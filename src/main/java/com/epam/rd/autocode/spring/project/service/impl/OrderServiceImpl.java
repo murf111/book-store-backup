@@ -59,12 +59,13 @@ public class OrderServiceImpl implements OrderService {
                                                 ("Client not found: " + orderDTO.getClientEmail()));
         order.setClient(client);
 
-        if (orderDTO.getEmployeeEmail() != null) {
-            Employee employee = employeeRepository.findByEmail(orderDTO.getEmployeeEmail())
-                                                  .orElseThrow(() -> new NotFoundException
-                                                          ("Employee not found: " + orderDTO.getEmployeeEmail()));
-            order.setEmployee(employee);
-        }
+//        if (orderDTO.getEmployeeEmail() != null) {
+//            Employee employee = employeeRepository.findByEmail(orderDTO.getEmployeeEmail())
+//                                                  .orElseThrow(() -> new NotFoundException
+//                                                          ("Employee not found: " + orderDTO.getEmployeeEmail()));
+//            order.setEmployee(employee);
+//        }
+        order.setEmployee(null);
 
         List<BookItem> bookItems = new ArrayList<>();
         BigDecimal totalPrice = BigDecimal.ZERO;

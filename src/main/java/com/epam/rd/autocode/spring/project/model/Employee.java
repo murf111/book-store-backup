@@ -16,8 +16,6 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "EMPLOYEES")
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @SuperBuilder
 public class Employee extends User{
