@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header_css}">
+    <title th:text="#{client.title}">Client Management</title>
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5">
+    <h2 class="mb-4" th:text="#{client.title}">Client Management</h2>
+
+    <table class="table table-striped table-hover shadow-sm">
+        <thead class="table-dark">
+        <tr>
+            <th th:text="#{client.header.name}">Name</th>
+            <th th:text="#{client.header.email}">Email</th>
+            <th th:text="#{client.header.balance}">Balance</th>
+            <th th:text="#{client.header.status}">Status</th>
+            <th th:text="#{client.header.action}">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="client : ${clients}">
+            <td th:text="${client.name}">Name</td>
+            <td th:text="${client.email}">email@test.com</td>
+            <td th:text="${'$' + client.balance}">$0.00</td>
+            <td>
+                <span th:if="${client.isBlocked}"
+                      class="badge bg-danger"
+                      th:text="#{client.status.blocked}">Blocked</span>
+
+                <span th:unless="${client.isBlocked}"
+                      class="badge bg-success"
+                      th:text="#{client.status.active}">Active</span>
+            </td>
+            <td>
+                <form th:action="@{/clients/{email}/block(email=${client.email})}" method="post">
+                    <input type="hidden" name="_method" value="patch"/>
+
+                    <input type="hidden" name="block" th:value="${!client.isBlocked}"/>
+
+                    <button type="submit" class="btn btn-sm"
+                            th:classappend="${client.isBlocked} ? 'btn-outline-success' : 'btn-outline-danger'"
+                            th:text="${client.isBlocked} ? #{client.button.unblock} : #{client.button.block}">
+                        Block
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:replace="~{fragments :: footer_scripts}"></div>
+</body>
+</html>

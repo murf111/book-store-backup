@@ -36,7 +36,7 @@ public class Book {
     private Long id;
 
     @NotBlank
-    @Column(name = "NAME", nullable = false)
+    @Column(name = "NAME", nullable = false, unique = true)
     private String name;
 
     @NotBlank
@@ -78,4 +78,7 @@ public class Book {
     @Enumerated(EnumType.STRING)
     @Column(name = "LANGUAGE", nullable = false)
     private Language language;
+
+    @Column(name = "IMAGE_URL")
+    private String imageUrl;
 }

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header_css}">
+    <title th:text="#{nav.profile}">Profile</title>
+</head>
+<body>
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+
+            <div class="text-center mb-4">
+                <div class="bg-dark text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 80px; height: 80px;">
+                    <i class="bi bi-person-circle fs-1"></i>
+                </div>
+                <h2 th:text="#{profile.title}">My Profile</h2>
+            </div>
+
+            <div th:if="${param.success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="#{profile.msg.success}">Profile updated successfully!</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${param.successPassword}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="#{profile.msg.pass_success}">Password changed successfully!</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${param.error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="#{profile.msg.error}">Incorrect current password.</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold" th:text="#{profile.section.personal}">Personal Information</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/profile/update}" method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted" th:text="#{profile.label.email}">Email</label>
+                            <input type="text" class="form-control" th:value="${user.email}" disabled readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label text-muted" th:text="#{profile.label.role}">Role</label>
+                            <input type="text" class="form-control" th:value="${user.role}" disabled readonly>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{profile.label.name}">Full Name</label>
+                            <input type="text" name="name" class="form-control" th:value="${user.name}" required>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i> <span th:text="#{profile.button.save}">Save Changes</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold text-danger" th:text="#{profile.section.security}">Security</h5>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/profile/password}" method="post">
+
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{profile.label.current_pass}">Current Password</label>
+                            <input type="password" name="currentPassword" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" th:text="#{profile.label.new_pass}">New Password</label>
+                            <input type="password" name="newPassword" class="form-control" required>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-key me-2"></i> <span th:text="#{profile.button.change_pass}">Change Password</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-danger mt-4">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0 fw-bold">
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted" th:text="#{profile.danger.warning}">
+                        Once you delete your account, there is no going back. Please be certain.
+                    </p>
+                    <div class="d-flex justify-content-end">
+                        <form th:action="@{/profile}" th:method="delete"
+                              onsubmit="return confirm('Are you sure you want to delete your account? This cannot be undone.');">
+                            <button type="submit" class="btn btn-outline-danger">
+                                <i class="bi bi-trash3 me-2"></i>
+                                <span th:text="#{profile.button.delete}">Delete Account</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments :: footer_scripts}"></div>
+</body>
+</html>

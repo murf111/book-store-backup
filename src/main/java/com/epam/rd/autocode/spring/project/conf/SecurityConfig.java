@@ -12,9 +12,9 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
@@ -26,32 +26,48 @@ public class SecurityConfig{
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable)
+                .csrf(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         // For public (registration & database)
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/clients", "/employees").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/books/**", "/").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/clients").permitAll()
 
                         // For employees
-                        .requestMatchers(HttpMethod.POST, "/books").hasRole("EMPLOYEE")
+                        .requestMatchers("/employees/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, "/books", "/employees").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.PATCH, "/books/**").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.DELETE, "/books/**").hasRole("EMPLOYEE")
-                        .requestMatchers("/employees/**").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.GET, "/clients").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, "/clients/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.PATCH, "/clients/*/block").hasRole("EMPLOYEE")
+                        .requestMatchers("/orders/*/confirm").hasRole("EMPLOYEE")
+                        // Restrict the "Add" and "Edit" pages to Employees only
+                        .requestMatchers("/books/add", "/books/*/edit").hasRole("EMPLOYEE")
 
                         // For clients
                         .requestMatchers(HttpMethod.POST, "/orders").hasRole("CLIENT")
+                        .requestMatchers("/cart/**").hasRole("CLIENT")
 
-                        // For registered users
-                        .requestMatchers(HttpMethod.GET, "/books/**").authenticated()
-
-                        .requestMatchers("/clients/**").authenticated()
                         .requestMatchers("/orders/**").authenticated()
+                        .requestMatchers("/profile/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(Customizer.withDefaults())
+                .formLogin(form -> form
+                        .loginPage("/login")           // The URL of your custom page
+                        .loginProcessingUrl("/login")  // The URL where the form POSTs data
+                        .defaultSuccessUrl("/", true)  // Redirect to Home after success
+                        .failureUrl("/login?error=true") // Redirect here on bad password
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
+                        .logoutSuccessUrl("/login?logout=true")
+                        .permitAll()
+                )
                 .headers(headers -> headers
                         .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
@@ -67,7 +83,7 @@ public class SecurityConfig{
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return NoOpPasswordEncoder.getInstance();
+    public BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

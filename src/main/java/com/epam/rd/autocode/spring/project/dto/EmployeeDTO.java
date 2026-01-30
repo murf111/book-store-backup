@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -20,6 +21,7 @@ public class EmployeeDTO{
     private String email;
 
     @NotBlank
+    @ToString.Exclude
     private String password;
 
     @NotBlank

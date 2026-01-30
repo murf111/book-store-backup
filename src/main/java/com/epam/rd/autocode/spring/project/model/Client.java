@@ -1,30 +1,53 @@
 package com.epam.rd.autocode.spring.project.model;
 
+import com.epam.rd.autocode.spring.project.model.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 
+/**
+ * Represents a customer entity within the system.
+ * <p>
+ * Extends {@link User} to inherit authentication credentials.
+ * Includes financial attributes and security status specific to customers.
+ * </p>
+ */
 @Entity
-@Table(name = "CLIENTS")
-@Data
+@Table(name = "CLIENTS") // Linked to USERS table by ID
+@Getter
+@Setter
 @NoArgsConstructor
-@EqualsAndHashCode(callSuper = true)
+@AllArgsConstructor
+@SuperBuilder
+@ToString(callSuper = true)
 public class Client extends User{
 
-    @Column(name = "BALANCE")
+    @NotNull
+    @DecimalMin("0.0")
+    @Column(name = "BALANCE", nullable = false)
     private BigDecimal balance;
 
-    public Client(Long id, String email, String name, String password, BigDecimal balance) {
-        super(id, email, name, password);
-        this.balance = balance;
+    @Column(name = "IS_BLOCKED", nullable = false)
+    @Builder.Default
+    private Boolean isBlocked = false;
+
+    // Before saving a new Client to DB, automatically set the Role to CLIENT
+    @PrePersist
+    public void prePersist() {
+        if (this.role == null) {
+            this.role = Role.CLIENT;
+        }
     }
 }

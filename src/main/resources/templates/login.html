@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="~{fragments :: header_css}"></head>
+
+<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
+
+<div class="card shadow-lg border-0 rounded-4" style="width: 100%; max-width: 400px;">
+    <div class="card-body p-5">
+
+        <div class="text-center mb-4">
+            <div class="bg-primary bg-gradient text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                <i class="bi bi-person-lock fs-2"></i>
+            </div>
+            <h3 class="fw-bold" th:text="#{login.header}">Welcome Back</h3>
+            <p class="text-muted" th:text="#{login.subheader}">Sign in to your BookStore account</p>
+        </div>
+
+        <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div th:text="#{login.error}">Invalid email or password.</div>
+        </div>
+
+        <div th:if="${param.logout}" class="alert alert-success d-flex align-items-center" role="alert">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            <div th:text="#{login.logout_success}">You have been logged out.</div>
+        </div>
+
+        <form th:action="@{/login}" method="post">
+
+            <div class="form-floating mb-3">
+                <input type="email" class="form-control" id="username" name="username" placeholder="name@example.com" required autofocus>
+                <label for="username" th:text="#{login.label.email}">Email address</label>
+            </div>
+
+            <div class="form-floating mb-4">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                <label for="password" th:text="#{login.label.password}">Password</label>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg" th:text="#{login.button.signin}">Sign In</button>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="card-footer bg-transparent border-0 text-center py-3">
+        <small class="text-muted">
+            <span th:text="#{login.register_prompt}">Don't have an account?</span>
+            <a th:href="@{/register}" class="text-decoration-none" th:text="#{login.register_link}">Register here</a>
+        </small>
+    </div>
+</div>
+
+</body>
+</html>

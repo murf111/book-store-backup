@@ -18,6 +18,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDTO{
+
+    private Long id;
+
     @NotBlank
     @Email
     private String clientEmail;
@@ -33,4 +36,7 @@ public class OrderDTO{
 
     @NotEmpty
     private List<BookItemDTO> bookItems;
+
+    @NotNull
+    private String status;
 }

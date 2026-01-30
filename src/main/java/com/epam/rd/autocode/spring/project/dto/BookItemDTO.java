@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookItemDTO {
+
     @NotBlank
     private String bookName;
 

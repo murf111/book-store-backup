@@ -8,18 +8,24 @@ import com.epam.rd.autocode.spring.project.repo.ClientRepository;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Implementation of {@link ClientService}.
+ * <p>
+ * Manages the registration, retrieval, and modification of Customer accounts.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
     private final ClientRepository clientRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<ClientDTO> getAllClients() {
@@ -67,7 +73,19 @@ public class ClientServiceImpl implements ClientService {
         }
         Client newClient = modelMapper.map(client, Client.class);
 
+        newClient.setPassword(passwordEncoder.encode(newClient.getPassword()));
+
         Client savedClient = clientRepository.save(newClient);
         return modelMapper.map(savedClient, ClientDTO.class);
+    }
+
+    @Override
+    @Transactional
+    public void blockClient(String email, boolean isBlocked) {
+        Client client = clientRepository.findByEmail(email)
+                                        .orElseThrow(() -> new NotFoundException
+                                                ("Client with email " + email + " was not found"));
+        client.setIsBlocked(isBlocked);
+        clientRepository.save(client);
     }
 }

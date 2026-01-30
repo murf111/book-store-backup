@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments :: header_css}"></head>
+
+<body>
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5 mb-5">
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/}" class="text-decoration-none" th:text="#{book.detail.breadcrumb.home}">Home</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/books}" class="text-decoration-none" th:text="#{book.detail.breadcrumb.books}">Books</a></li>
+            <li class="breadcrumb-item active" aria-current="page" th:text="${book.name}">Book Title</li>
+        </ol>
+    </nav>
+
+    <div class="card shadow-sm border-0">
+        <div class="row g-0">
+
+            <div class="col-md-4 bg-light d-flex align-items-center justify-content-center" style="min-height: 400px;">
+                <div class="text-center text-muted">
+                    <i class="bi bi-book" style="font-size: 5rem;"></i>
+                    <p class="mt-2" th:text="#{book.detail.cover_text}">Cover Image</p>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card-body p-4">
+
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <h1 class="card-title fw-bold mb-1" th:text="${book.name}">Book Title</h1>
+                            <h5 class="text-muted mb-3" th:text="#{book.detail.by} + ' ' + ${book.author}">by Author</h5>
+                        </div>
+                        <h2 class="text-primary fw-bold" th:text="${'$' + book.price}">$24.99</h2>
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="badge bg-primary me-2" th:text="${book.genre}">Genre</span>
+                        <span class="badge bg-secondary me-2" th:text="${book.language}">Language</span>
+                        <span class="badge bg-info text-dark" th:text="${book.ageGroup}">Age Group</span>
+                    </div>
+
+                    <div class="mb-4">
+                        <h5 class="fw-bold" th:text="#{book.detail.description}">Description</h5>
+                        <p class="card-text text-secondary" th:text="${book.description}">
+                            Description coming soon.
+                        </p>
+                    </div>
+
+                    <div class="row mb-4 bg-light p-3 rounded mx-0">
+                        <div class="col-6 mb-2">
+                            <small class="text-muted d-block" th:text="#{book.detail.publication_date}">Publication Date</small>
+                            <span class="fw-bold" th:text="${book.publicationDate}">2026-01-01</span>
+                        </div>
+                        <div class="col-6 mb-2">
+                            <small class="text-muted d-block" th:text="#{book.detail.pages}">Pages</small>
+                            <span class="fw-bold" th:text="${book.pages}">350</span>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block" th:text="#{book.detail.characteristics}">Characteristics</small>
+                            <span class="fst-italic" th:text="${book.characteristics}">Coming soon</span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+
+                        <form sec:authorize="!hasRole('EMPLOYEE')"
+                              th:action="@{/cart/add/{id}(id=${book.id})}"
+                              method="post">
+
+                            <button type="submit" class="btn btn-lg btn-success px-4">
+                                <i class="bi bi-cart-plus me-2"></i> <span th:text="#{book.list.button.add_cart}">Add to Cart</span>
+                            </button>
+                        </form>
+
+                        <a sec:authorize="hasRole('EMPLOYEE')"
+                           th:href="@{/books/{name}/edit(name=${book.name})}"
+                           class="btn btn-lg btn-warning px-4">
+                            <i class="bi bi-pencil-square me-2"></i> <span th:text="#{book.form.edit.title}">Edit Book</span>
+                        </a>
+
+                        <a th:href="@{/books}" class="btn btn-lg btn-outline-secondary px-4" th:text="#{book.detail.button.back}">
+                            Back to List
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments :: footer_scripts}"></div>
+
+</body>
+</html>

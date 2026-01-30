@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+
+<head th:fragment="header_css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Book Store</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+</head>
+
+<div th:fragment="navbar">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" th:href="@{/}">📚 BookStore</a>
+
+            <div class="navbar-nav">
+                <a class="nav-link" th:href="@{/books}" th:text="#{nav.choose_book}">Choose your new book 🧐</a>
+            </div>
+
+            <form class="d-flex ms-3 me-auto" role="search" th:action="@{/books}" method="get">
+                <input class="form-control me-2"
+                       type="search"
+                       name="keyword"
+                       th:placeholder="#{nav.search_placeholder}"
+                       aria-label="Search"
+                       th:value="${keyword}">
+                <button class="btn btn-outline-secondary" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </form>
+
+            <div class="me-3">
+                <a th:href="@{''(lang='en')}" class="text-decoration-none text-light me-2">EN</a>
+                <span class="text-secondary">|</span>
+                <a th:href="@{''(lang='uk')}" class="text-decoration-none text-light ms-2">UK</a>
+            </div>
+
+            <div class="d-flex align-items-center">
+
+                <a th:unless="${#authorization.expression('isAuthenticated()')}"
+                   th:href="@{/login}"
+                   class="btn btn-primary btn-sm"
+                   th:text="#{nav.login}">Login</a>
+
+                <div th:if="${#authorization.expression('isAuthenticated()')}" class="dropdown">
+
+                    <button class="btn btn-dark dropdown-toggle" type="button"
+                            id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span th:text="#{nav.welcome}">Hi,</span> <span sec:authentication="name">User</span>
+                    </button>
+
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+
+                        <li><a class="dropdown-item" th:href="@{/profile}" th:text="#{nav.profile}">Profile</a></li>
+
+                        <li sec:authorize="hasRole('CLIENT')">
+                            <a class="dropdown-item" th:href="@{/orders}" th:text="#{nav.my_orders}">My orders</a>
+                        </li>
+                        <li sec:authorize="hasRole('CLIENT')">
+                            <a class="dropdown-item" th:href="@{/cart}" th:text="#{nav.cart}">Cart</a>
+                        </li>
+
+                        <li sec:authorize="hasRole('EMPLOYEE')">
+                            <a class="dropdown-item" th:href="@{/clients}" th:text="#{nav.client_management}">Client Management</a>
+                        </li>
+                        <li sec:authorize="hasRole('EMPLOYEE')">
+                            <a class="dropdown-item" th:href="@{/orders}" th:text="#{nav.order_management}">Order Management</a>
+                        </li>
+
+                        <li><hr class="dropdown-divider"></li>
+
+                        <li>
+                            <form th:action="@{/logout}" method="post">
+                                <button type="submit" class="dropdown-item text-danger" th:text="#{nav.logout}">Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+</div>
+
+
+<div th:fragment="notifications">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="cartToast" class="toast align-items-center text-bg-success border-0"
+             role="alert" aria-live="assertive" aria-atomic="true"
+             th:if="${cartMessage}">
+            <div class="d-flex">
+                <div class="toast-body fs-6">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <span th:text="#{cart.notify.success}">Book added!</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<th:block th:fragment="toast_script">
+    <script th:if="${cartMessage}">
+        document.addEventListener('DOMContentLoaded', function () {
+            const toastElement = document.getElementById('cartToast');
+            if (toastElement) {
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+            }
+        });
+    </script>
+</th:block>
+
+<div th:fragment="copyright">
+    <div class="container text-center py-3 text-muted">
+        <small>© 2026 BookStore — Developed by Denys Sych</small>
+    </div>
+</div>
+
+<div th:fragment="footer_scripts">
+
+    <div th:replace="~{fragments :: notifications}"></div>
+    <div th:replace="~{fragments :: copyright}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <th:block th:replace="~{fragments :: toast_script}"></th:block>
+
+</div>
+
+</html>

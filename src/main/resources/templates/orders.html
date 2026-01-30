@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: header_css}">
+    <title th:text="#{order.title}">Order History</title>
+</head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5">
+    <h2 class="mb-4" th:text="#{order.title}">Order History</h2>
+
+    <table class="table table-bordered shadow-sm">
+        <thead class="bg-light">
+        <tr>
+            <th th:text="#{order.header.date}">Date</th>
+            <th th:text="#{order.header.total_price}">Total Price</th>
+            <th th:text="#{order.header.status}">Status</th>
+            <th sec:authorize="hasRole('EMPLOYEE')" th:text="#{order.header.action}">Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+            <td th:text="${#temporals.format(order.orderDate, 'dd-MM-yyyy HH:mm')}">Date</td>
+
+            <td th:text="${'$' + order.price}">Price</td>
+
+            <td>
+                <span class="badge"
+                      th:classappend="${order.status == 'CONFIRMED' ? 'bg-success' : 'bg-warning text-dark'}"
+                      th:text="#{ 'order.status.' + ${#strings.toLowerCase(order.status)} }">Status</span>
+            </td>
+
+            <td sec:authorize="hasRole('EMPLOYEE')">
+                <form th:if="${order.status == 'PENDING'}"
+                      th:action="@{/orders/{id}/confirm(id=${order.id})}" method="post">
+                    <input type="hidden" name="_method" value="patch"/>
+                    <button type="submit" class="btn btn-success btn-sm" th:text="#{order.button.confirm}">Confirm</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<div th:replace="~{fragments :: footer_scripts}"></div>
+</body>
+</html>

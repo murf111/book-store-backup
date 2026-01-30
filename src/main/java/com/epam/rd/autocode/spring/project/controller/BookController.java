@@ -1,52 +1,140 @@
 package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.dto.BookDTO;
+import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
+import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
+import com.epam.rd.autocode.spring.project.model.enums.Language;
 import com.epam.rd.autocode.spring.project.service.BookService;
+import com.epam.rd.autocode.spring.project.util.FileUploadUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
-@RestController
+@Controller
 @RequestMapping("/books")
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
 
     @GetMapping
-    public List<BookDTO> getAllBooks() {
-        return bookService.getAllBooks();
+    public String getBooks(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(required = false) AgeGroup ageGroup,
+            @RequestParam(required = false) Language language,
+            @RequestParam(required = false, defaultValue = "newest") String sort,
+            Model model) {
+
+        // 1. Translate string "sort" param to actual Sort object
+        Sort sortObj = Sort.unsorted();
+        if ("price_asc".equals(sort)) {
+            sortObj = Sort.by(Sort.Direction.ASC, "price");
+        } else if ("price_desc".equals(sort)) {
+            sortObj = Sort.by(Sort.Direction.DESC, "price");
+        } else if ("name_asc".equals(sort)) {
+            sortObj = Sort.by(Sort.Direction.ASC, "name");
+        } else {
+            // Default: Newest first (Sort by ID Descending)
+            sortObj = Sort.by(Sort.Direction.DESC, "id");
+        }
+
+        // 2. Call the service with all parameters
+        List<BookDTO> books = bookService.findBooks(keyword, genre, minPrice, maxPrice, ageGroup, language, sortObj);
+
+        model.addAttribute("books", books);
+
+        // Pass params back to view so they stick in the form inputs
+        // (Thymeleaf can usually grab them from param.X, but this is safe)
+        // Note: You don't strictly need to add them to model if you use ${param.keyword} in HTML
+
+        return "books/list";
     }
 
     @GetMapping("/{name}")
-    public BookDTO getBookByName(@PathVariable String name) {
-        return bookService.getBookByName(name);
+    public String getBookByName(@PathVariable String name, Model model) {
+        model.addAttribute("book", bookService.getBookByName(name));
+        return "books/detail";
+    }
+
+    @GetMapping("/search/{keyword}")
+    public String getBookByKeyword(@PathVariable String keyword, Model model) {
+        model.addAttribute("books", bookService.getBooksByKeyword(keyword));
+        return "books/list";
+    }
+
+    @GetMapping("/add")
+    public String showAddBookForm(Model model) {
+        model.addAttribute("book", new BookDTO());
+        return "books/add";
     }
 
     @PostMapping
-    public ResponseEntity<BookDTO> addBook(@RequestBody @Valid BookDTO bookDTO) {
-        BookDTO createdBook = bookService.addBook(bookDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdBook);
+    public String addBook(@ModelAttribute("book") @Valid BookDTO bookDTO,
+                          BindingResult bindingResult,
+                          Model model) {
+        if (bindingResult.hasErrors()) {
+            return "books/add";
+        }
+
+        try {
+            if (bookDTO.getImageFile() != null && !bookDTO.getImageFile().isEmpty()) {
+                String fileName = FileUploadUtil.saveFile(bookDTO.getImageFile());
+                bookDTO.setImageUrl(fileName);
+            }
+
+            bookService.addBook(bookDTO);
+        } catch (AlreadyExistException e) {
+            bindingResult.rejectValue("name", "error.book", e.getMessage());
+            return "books/add";
+        } catch (IOException e) {
+            // Handle File Upload Error
+            e.printStackTrace(); // Good for debugging
+            bindingResult.reject("error.upload", "Failed to upload image. Please try again.");
+            return "books/add";
+        }
+
+        return "redirect:/books";
     }
 
-    @PatchMapping("/{name}")
-    public BookDTO updateBookByName(@PathVariable String name, @RequestBody @Valid BookDTO book) {
-        return bookService.updateBookByName(name, book);
+    @GetMapping("/{name}/edit")
+    public String showEditBookForm(@PathVariable String name, Model model) {
+        BookDTO bookDTO = bookService.getBookByName(name);
+        model.addAttribute("book", bookDTO);
+        return "books/edit";
     }
 
-    @DeleteMapping("/{name}")
-    public ResponseEntity<Void> deleteBookByName(@PathVariable String name) {
-        bookService.deleteBookByName(name);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/{id}")
+    public String updateBookById(@PathVariable Long id, @ModelAttribute("book") @Valid BookDTO bookDTO) {
+        bookService.updateBookById(id, bookDTO);
+        return "redirect:/books/" + bookDTO.getName();
+    }
+
+    @DeleteMapping("/{id}")
+    public String deleteBookById(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        bookService.deleteBookById(id);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Book deleted successfully!");
+
+        return "redirect:/books";
     }
 }

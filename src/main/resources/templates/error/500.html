@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header_css}"></head>
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+<div class="container mt-5 text-center">
+    <h1 class="display-1 text-danger">500</h1>
+    <h3 class="mb-4">Internal Server Error</h3>
+    <p class="lead" th:text="${errorMessage}">Error details here</p>
+    <a href="/" class="btn btn-primary">Go Home</a>
+</div>
+</body>
+</html>

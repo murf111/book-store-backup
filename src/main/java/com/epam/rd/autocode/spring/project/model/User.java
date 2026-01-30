@@ -1,35 +1,63 @@
 package com.epam.rd.autocode.spring.project.model;
 
+import com.epam.rd.autocode.spring.project.model.enums.Role;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
-@MappedSuperclass
+/**
+ * Represents a base entity representing a system user.
+ * <p>
+ * Uses JOINED inheritance strategy to share common parameters across {@link Client} and {@link Employee}.
+ * </p>
+ */
+
+@Entity
+@Table(name = "USERS")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class User {
+@ToString
+public abstract class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Email
     @NotBlank
+    @Column(nullable = false, unique = true) // No duplicate emails allowed
     private String email;
 
     @NotBlank
+    @Column(nullable = false)
     private String name;
 
     @NotBlank
-    private String password;
+    @Column(nullable = false)
+    private String password; // Stores the BCrypt Hash, NOT password itself
+
+    @NotNull
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    protected Role role;
 }

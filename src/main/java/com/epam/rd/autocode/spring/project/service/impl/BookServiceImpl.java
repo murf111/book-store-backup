@@ -4,13 +4,19 @@ import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Book;
+import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
+import com.epam.rd.autocode.spring.project.model.enums.Language;
 import com.epam.rd.autocode.spring.project.repo.BookRepository;
+import com.epam.rd.autocode.spring.project.repo.spec.BookSpecification;
 import com.epam.rd.autocode.spring.project.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -36,13 +42,68 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
+    public BookDTO getBookById(Long id) {
+        return bookRepository.findById(id)
+                             .map(book -> modelMapper.map(book, BookDTO.class))
+                             .orElseThrow(() -> new NotFoundException
+                                     ("Book with id " + id + " was not found"));
+    }
+
+    @Override
+    public List<BookDTO> getBooksByKeyword(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return getAllBooks();
+        }
+
+        List<Book> books = bookRepository
+                .findByNameContainingIgnoreCaseOrAuthorContainingIgnoreCase(keyword, keyword);
+
+
+        return books.stream()
+                    .map(book -> modelMapper.map(book, BookDTO.class))
+                    .toList();
+    }
+
+    @Override
+    public List<BookDTO> findBooks(String keyword, String genre, BigDecimal minPrice, BigDecimal maxPrice,
+                                   AgeGroup ageGroup, Language language, Sort sort) {
+
+        Specification<Book> spec = Specification.where(BookSpecification.hasKeyword(keyword))
+                                                .and(BookSpecification.hasGenre(genre))
+                                                .and(BookSpecification.priceGreaterThan(minPrice))
+                                                .and(BookSpecification.priceLessThan(maxPrice))
+                                                .and(BookSpecification.hasAgeGroup(ageGroup))
+                                                .and(BookSpecification.hasLanguage(language));
+
+        List<Book> books = bookRepository.findAll(spec, sort);
+
+        return books.stream()
+                    .map(book -> modelMapper.map(book, BookDTO.class))
+                    .toList();
+    }
+
+    @Override
     @Transactional
-    public BookDTO updateBookByName(String name, BookDTO book) {
+    public BookDTO updateBookByName(String name, BookDTO bookDTO) {
         Book existingBook = bookRepository.findByName(name)
                                           .orElseThrow(() -> new NotFoundException
                                                   ("Book with name " + name + " was not found"));
 
-        modelMapper.map(book, existingBook);
+        modelMapper.map(bookDTO, existingBook);
+
+        Book savedBook = bookRepository.save(existingBook);
+
+        return modelMapper.map(savedBook, BookDTO.class);
+    }
+
+    @Override
+    @Transactional
+    public BookDTO updateBookById(Long id, BookDTO bookDTO) {
+        Book existingBook = bookRepository.findById(id)
+                                          .orElseThrow(() -> new NotFoundException
+                                                  ("Book with name " + bookDTO.getName() + " was not found"));
+
+        modelMapper.map(bookDTO, existingBook);
 
         Book savedBook = bookRepository.save(existingBook);
 
@@ -56,6 +117,15 @@ public class BookServiceImpl implements BookService {
                                       .findByName(name)
                                       .orElseThrow(() -> new NotFoundException
                                               ("Book with name " + name + " was not found")));
+    }
+
+    @Override
+    @Transactional
+    public void deleteBookById(Long id) {
+        bookRepository.delete(bookRepository
+                                      .findById(id)
+                                      .orElseThrow(() -> new NotFoundException
+                                              ("Book with id " + id + " was not found")));
     }
 
     @Override

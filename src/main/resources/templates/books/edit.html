@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: header_css}"></head>
+
+<body>
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8"> <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="bi bi-pencil-square"></i> <span th:text="#{book.form.edit.title}">Edit Book</span>
+                </h4>
+            </div>
+            <div class="card-body">
+
+                <form th:action="@{/books/{id}(id=${book.id})}" th:object="${book}" method="post">
+
+                    <input type="hidden" name="_method" value="patch" />
+
+                    <input type="hidden" th:field="*{id}" />
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label" th:text="#{book.form.label.title}">Book Title</label>
+                        <input type="text" class="form-control" id="name" th:field="*{name}" readonly>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="genre" class="form-label" th:text="#{book.form.label.genre}">Genre</label>
+                            <input type="text" class="form-control" id="genre" th:field="*{genre}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="author" class="form-label" th:text="#{book.form.label.author}">Author</label>
+                            <input type="text" class="form-control" id="author" th:field="*{author}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" th:text="#{book.form.label.price}">Price</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" class="form-control" th:field="*{price}" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" th:text="#{book.form.label.pages}">Pages</label>
+                            <input type="number" class="form-control" th:field="*{pages}" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label" th:text="#{book.form.label.date}">Publication Date</label>
+                            <input type="date" class="form-control" name="publicationDate"
+                                   th:value="${book.publicationDate}" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" th:text="#{book.form.label.language}">Language</label>
+                            <select class="form-select" th:field="*{language}">
+                                <option value="ENGLISH" th:text="#{enum.lang.english}">English</option>
+                                <option value="UKRAINIAN" th:text="#{enum.lang.ukrainian}">Ukrainian</option>
+                                <option value="SPANISH" th:text="#{enum.lang.spanish}">Spanish</option>
+                                <option value="OTHER" th:text="#{enum.lang.other}">Other</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label" th:text="#{book.form.label.age_group}">Age Group</label>
+                            <select class="form-select" th:field="*{ageGroup}">
+                                <option value="CHILD" th:text="#{enum.age.child}">Child</option>
+                                <option value="TEEN" th:text="#{enum.age.teen}">Teen</option>
+                                <option value="ADULT" th:text="#{enum.age.adult}">Adult</option>
+                                <option value="OTHER" th:text="#{enum.age.other}">Other</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="characteristics" class="form-label" th:text="#{book.form.label.characteristics}">Characteristics</label>
+                        <input type="text" class="form-control" id="characteristics" th:field="*{characteristics}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label" th:text="#{book.form.label.description}">Description</label>
+                        <textarea class="form-control" id="description" th:field="*{description}" rows="3" required></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a th:href="@{/books}" class="btn btn-secondary me-md-2" th:text="#{book.form.button.cancel}">Cancel</a>
+                        <button type="submit" class="btn btn-primary" th:text="#{book.form.button.save}">Save Changes</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments :: footer_scripts}"></div>
+</body>
+</html>

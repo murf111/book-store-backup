@@ -8,6 +8,7 @@ import com.epam.rd.autocode.spring.project.model.BookItem;
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.Employee;
 import com.epam.rd.autocode.spring.project.model.Order;
+import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
 import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.repo.ClientRepository;
 import com.epam.rd.autocode.spring.project.repo.EmployeeRepository;
@@ -22,7 +23,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
+/**
+ * Implementation of {@link OrderService}.
+ * <p>
+ * Handles the whole lifecycle of orders, including creation and price calculation.
+ * </p>
+ */
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -31,6 +39,14 @@ public class OrderServiceImpl implements OrderService {
     private final EmployeeRepository employeeRepository;
     private final BookRepository bookRepository;
     private final ModelMapper modelMapper;
+
+    @Override
+    public List<OrderDTO> getAllOrders() {
+        return orderRepository.findAll()
+                              .stream()
+                              .map(order -> modelMapper.map(order, OrderDTO.class))
+                              .toList();
+    }
 
     @Override
     public List<OrderDTO> getOrdersByClient(String clientEmail) {
@@ -48,6 +64,28 @@ public class OrderServiceImpl implements OrderService {
                               .toList();
     }
 
+    /**
+     * Creates a new order in the system.
+     * <p>
+     * <strong>Business Logic:</strong>
+     * <ul>
+     * <li>Verifies the existence of the Client.</li>
+     * <li>Iterates through requested Book items to verify existence and fetch current prices.</li>
+     * <li>Calculates the total price server-side to prevent client-side price manipulation.</li>
+     * <li>Sets the {@code orderDate} to the current server timestamp.</li>
+     * <li>Initially sets the assigned Employee to {@code null} (Pending state).</li>
+     * </ul>
+     * </p>
+     * <p>
+     * <strong>Transaction:</strong> Marked as {@code @Transactional} to ensure that the Order
+     * and all its BookItems are saved atomically. If any book is not found, the entire
+     * operation rolls back.
+     * </p>
+     *
+     * @param orderDTO data transfer object containing client email and list of books.
+     * @return the persisted Order converted to DTO.
+     * @throws NotFoundException if the client or any of the books cannot be found in the database.
+     */
     @Override
     @Transactional
     public OrderDTO addOrder(OrderDTO orderDTO) {
@@ -58,13 +96,6 @@ public class OrderServiceImpl implements OrderService {
                                         .orElseThrow(() -> new NotFoundException
                                                 ("Client not found: " + orderDTO.getClientEmail()));
         order.setClient(client);
-
-//        if (orderDTO.getEmployeeEmail() != null) {
-//            Employee employee = employeeRepository.findByEmail(orderDTO.getEmployeeEmail())
-//                                                  .orElseThrow(() -> new NotFoundException
-//                                                          ("Employee not found: " + orderDTO.getEmployeeEmail()));
-//            order.setEmployee(employee);
-//        }
         order.setEmployee(null);
 
         List<BookItem> bookItems = new ArrayList<>();
@@ -92,6 +123,25 @@ public class OrderServiceImpl implements OrderService {
         order.setPrice(totalPrice);
 
         Order savedOrder = orderRepository.save(order);
+
+        return modelMapper.map(savedOrder, OrderDTO.class);
+    }
+
+    @Override
+    @Transactional
+    public OrderDTO confirmOrder(Long orderId, String employeeEmail) {
+        Order order = orderRepository.findById(orderId)
+                                     .orElseThrow(() -> new NotFoundException
+                                             ("Order not found with id: " + orderId));
+
+        Employee employee = employeeRepository.findByEmail(employeeEmail)
+                                                        .orElseThrow(() -> new NotFoundException
+                                                                ("Employee not found with email: " + employeeEmail));
+        order.setStatus(OrderStatus.CONFIRMED);
+        order.setEmployee(employee);
+        Order savedOrder = orderRepository.save(order);
+        // HERE IS THE PROBLEM BECAUSE I SET NULL INSIDE addOrder but then I never change it
+        // handled the problem
 
         return modelMapper.map(savedOrder, OrderDTO.class);
     }

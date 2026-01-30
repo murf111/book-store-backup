@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -18,6 +20,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookDTO{
+
+    private Long id;
+
     @NotBlank
     private String name;
 
@@ -48,4 +53,9 @@ public class BookDTO{
 
     @NotNull
     private Language language;
+
+    private String imageUrl; // For display
+
+    @ToString.Exclude // Don't log the binary file
+    private MultipartFile imageFile; // For upload form
 }

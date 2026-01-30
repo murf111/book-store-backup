@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{fragments :: header_css}"></head>
+
+<body>
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container-fluid px-4 mt-4 mb-5">
+    <div class="row">
+
+        <div class="col-lg-3 col-xl-2 mb-4">
+            <div class="card shadow-sm border-0 sticky-top" style="top: 80px; z-index: 1;">
+                <div class="card-header bg-white fw-bold">
+                    <i class="bi bi-funnel"></i> <span th:text="#{book.list.filter.title}">Filters</span>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/books}" method="get" id="filterForm">
+
+                        <input type="hidden" name="keyword" th:value="${param.keyword}" th:if="${param.keyword}">
+
+                        <div class="mb-3">
+                            <label class="form-label small text-muted" th:text="#{book.form.label.genre}">Genre</label>
+                            <select class="form-select" name="genre">
+                                <option value="" th:text="#{book.list.filter.all_genres}">All Genres</option>
+                                <option value="Fantasy" th:selected="${param.genre == 'Fantasy'}">Fantasy</option>
+                                <option value="Adventure" th:selected="${param.genre == 'Adventure'}">Adventure</option>
+                                <option value="Romance" th:selected="${param.genre == 'Romance'}">Romance</option>
+                                <option value="Mystery" th:selected="${param.genre == 'Mystery'}">Mystery</option>
+                                <option value="Science Fiction" th:selected="${param.genre == 'Science Fiction'}">Science Fiction</option>
+                                <option value="Thriller" th:selected="${param.genre == 'Thriller'}">Thriller</option>
+                                <option value="Historical Fiction" th:selected="${param.genre == 'Historical Fiction'}">Historical</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small text-muted" th:text="#{book.list.filter.price_range}">Price Range</label>
+                            <div class="d-flex align-items-center">
+                                <input type="number" class="form-control form-control-sm" name="minPrice"
+                                       th:value="${param.minPrice}" th:placeholder="#{book.list.filter.min}">
+                                <span class="mx-2">-</span>
+                                <input type="number" class="form-control form-control-sm" name="maxPrice"
+                                       th:value="${param.maxPrice}" th:placeholder="#{book.list.filter.max}">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small text-muted" th:text="#{book.form.label.age_group}">Age Group</label>
+                            <select class="form-select" name="ageGroup">
+                                <option value="" th:text="#{book.list.filter.all_ages}">All Ages</option>
+                                <option value="CHILD" th:selected="${param.ageGroup != null && param.ageGroup[0] == 'CHILD'}" th:text="#{enum.age.child}">Child</option>
+                                <option value="TEEN" th:selected="${param.ageGroup != null && param.ageGroup[0] == 'TEEN'}" th:text="#{enum.age.teen}">Teen</option>
+                                <option value="ADULT" th:selected="${param.ageGroup != null && param.ageGroup[0] == 'ADULT'}" th:text="#{enum.age.adult}">Adult</option>
+                                <option value="OTHER" th:selected="${param.ageGroup != null && param.ageGroup[0] == 'OTHER'}" th:text="#{enum.age.other}">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label small text-muted" th:text="#{book.form.label.language}">Language</label>
+                            <select class="form-select" name="language">
+                                <option value="" th:text="#{book.list.filter.all_languages}">All Languages</option>
+                                <option value="ENGLISH" th:selected="${param.language != null && param.language[0] == 'ENGLISH'}" th:text="#{enum.lang.english}">English</option>
+                                <option value="UKRAINIAN" th:selected="${param.language != null && param.language[0] == 'UKRAINIAN'}" th:text="#{enum.lang.ukrainian}">Ukrainian</option>
+                                <option value="SPANISH" th:selected="${param.language != null && param.language[0] == 'SPANISH'}" th:text="#{enum.lang.spanish}">Spanish</option>
+                                <option value="FRENCH" th:selected="${param.language != null && param.language[0] == 'FRENCH'}" th:text="#{enum.lang.french}">French</option>
+                                <option value="GERMAN" th:selected="${param.language != null && param.language[0] == 'GERMAN'}" th:text="#{enum.lang.german}">German</option>
+                                <option value="JAPANESE" th:selected="${param.language != null && param.language[0] == 'JAPANESE'}" th:text="#{enum.lang.japanese}">Japanese</option>
+                                <option value="OTHER" th:selected="${param.language != null && param.language[0] == 'OTHER'}" th:text="#{enum.lang.other}">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm" th:text="#{book.list.filter.apply}">Apply Filters</button>
+                            <a th:href="@{/books}" class="btn btn-outline-secondary btn-sm" th:text="#{book.list.filter.clear}">Clear All</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9 col-xl-10">
+
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong th:text="${successMessage}">Operation successful!</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 p-3 bg-white rounded shadow-sm">
+
+                <h4 class="mb-0 fw-bold text-primary">
+                    <span th:text="#{book.list.title}">Book Catalog</span>
+                    <span th:if="${param.keyword}" class="text-muted fs-6 ms-2">
+                         <span th:text="#{book.list.search_results}">Results for:</span> "<span th:text="${param.keyword}"></span>"
+                    </span>
+                </h4>
+
+                <div class="d-flex align-items-center gap-2">
+
+                    <div sec:authorize="hasRole('EMPLOYEE')">
+                        <a th:href="@{/books/add}" class="btn btn-success text-nowrap px-4">
+                            <i class="bi bi-plus-circle"></i> <span th:text="#{book.list.button.add}">Add</span>
+                        </a>
+                    </div>
+
+                    <select class="form-select form-select-sm" name="sort" form="filterForm"
+                            onchange="this.form.submit()" style="min-width: 160px; cursor: pointer;">
+                        <option value="newest" th:selected="${param.sort == 'newest'}" th:text="#{book.list.sort.newest}">Newest Arrivals</option>
+                        <option value="price_asc" th:selected="${param.sort == 'price_asc'}" th:text="#{book.list.sort.price_asc}">Price: Low to High</option>
+                        <option value="price_desc" th:selected="${param.sort == 'price_desc'}" th:text="#{book.list.sort.price_desc}">Price: High to Low</option>
+                        <option value="name_asc" th:selected="${param.sort == 'name_asc'}" th:text="#{book.list.sort.name_asc}">Name: A-Z</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+
+                <div class="col" th:each="book : ${books}">
+                    <div class="card h-100 shadow-sm border-0 transition-hover">
+
+                        <div class="bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center position-relative rounded-top" style="height: 220px;">
+                            <i class="bi bi-book text-secondary opacity-50" style="font-size: 4rem;"></i>
+
+                            <span class="position-absolute top-0 start-0 m-2 badge bg-info text-dark bg-opacity-50 shadow-sm"
+                                  th:text="${book.genre}">Genre</span>
+                        </div>
+
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title text-truncate fw-bold mb-1"
+                                th:text="${book.name}" th:title="${book.name}">Book Title</h5>
+
+                            <p class="card-text text-muted small mb-2">
+                                <i class="bi bi-person"></i> <span th:text="${book.author}">Author</span>
+                            </p>
+
+                            <div class="mt-auto pt-2 border-top">
+
+                                <div class="d-flex justify-content-between align-items-center mt-2 mb-3">
+                                    <span class="fs-5 fw-bold text-primary" th:text="${'$' + book.price}">$19.99</span>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border"
+                                          th:text="${book.language}">ENG</span>
+                                </div>
+
+                                <div class="d-grid gap-2">
+
+                                    <div class="d-flex gap-2">
+                                        <a th:href="@{/books/{name}(name=${book.name})}"
+                                           class="btn btn-outline-primary btn-sm flex-grow-1">
+                                            <span th:text="#{book.list.button.view}">View</span>
+                                        </a>
+
+                                        <form sec:authorize="hasRole('CLIENT')"
+                                              th:action="@{/cart/add/{id}(id=${book.id})}"
+                                              th:method="post" class="flex-grow-1">
+                                            <button type="submit" class="btn btn-success btn-sm w-100" th:title="#{book.list.button.add_cart}">
+                                                <i class="bi bi-cart-plus"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <div sec:authorize="hasRole('EMPLOYEE')" class="btn-group shadow-sm" role="group">
+                                        <a th:href="@{/books/{name}/edit(name=${book.name})}"
+                                           class="btn btn-warning btn-sm" th:text="#{book.list.button.edit}">
+                                            Edit
+                                        </a>
+
+                                        <form th:action="@{/books/{id}(id=${book.id})}"
+                                              th:method="delete"
+                                              th:data-name="${book.name}"
+                                              th:data-confirm-msg="#{book.list.js.delete_confirm}"
+                                              onsubmit="return confirm(this.getAttribute('data-confirm-msg') + ' ' + this.getAttribute('data-name') + '?');">
+                                            <button type="submit" class="btn btn-danger btn-sm rounded-0 rounded-end">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 text-center py-5" th:if="${books.empty}">
+                    <div class="text-muted opacity-25 mb-3">
+                        <i class="bi bi-emoji-frown display-1"></i>
+                    </div>
+                    <h4 th:text="#{book.list.empty.title}">No books found</h4>
+                    <p class="text-muted" th:text="#{book.list.empty.text}">Try adjusting your search or filters.</p>
+                    <a th:href="@{/books}" class="btn btn-outline-secondary btn-sm mt-2" th:text="#{book.list.empty.button}">Clear Filters</a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{fragments :: footer_scripts}"></div>
+
+</body>
+</html>
