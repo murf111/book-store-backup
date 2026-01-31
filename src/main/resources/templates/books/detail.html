@@ -21,8 +21,15 @@
     <div class="card shadow-sm border-0">
         <div class="row g-0">
 
-            <div class="col-md-4 bg-light d-flex align-items-center justify-content-center" style="min-height: 400px;">
-                <div class="text-center text-muted">
+            <div class="col-md-4 bg-light d-flex align-items-center justify-content-center position-relative"
+                 style="min-height: 400px; overflow: hidden;">
+
+                <img th:if="${book.imageUrl}"
+                     th:src="@{'/content/' + ${book.imageUrl}}"
+                     class="w-100 h-100 object-fit-cover position-absolute top-0 start-0"
+                     alt="Cover">
+
+                <div th:unless="${book.imageUrl}" class="text-center text-muted">
                     <i class="bi bi-book" style="font-size: 5rem;"></i>
                     <p class="mt-2" th:text="#{book.detail.cover_text}">Cover Image</p>
                 </div>
@@ -47,9 +54,7 @@
 
                     <div class="mb-4">
                         <h5 class="fw-bold" th:text="#{book.detail.description}">Description</h5>
-                        <p class="card-text text-secondary" th:text="${book.description}">
-                            Description coming soon.
-                        </p>
+                        <p class="card-text text-secondary" th:text="${book.description}">Description...</p>
                     </div>
 
                     <div class="row mb-4 bg-light p-3 rounded mx-0">
@@ -63,16 +68,14 @@
                         </div>
                         <div class="col-12">
                             <small class="text-muted d-block" th:text="#{book.detail.characteristics}">Characteristics</small>
-                            <span class="fst-italic" th:text="${book.characteristics}">Coming soon</span>
+                            <span class="fst-italic" th:text="${book.characteristics}">Hardcover</span>
                         </div>
                     </div>
 
                     <div class="d-grid gap-2 d-md-flex justify-content-md-start">
-
                         <form sec:authorize="!hasRole('EMPLOYEE')"
                               th:action="@{/cart/add/{id}(id=${book.id})}"
                               method="post">
-
                             <button type="submit" class="btn btn-lg btn-success px-4">
                                 <i class="bi bi-cart-plus me-2"></i> <span th:text="#{book.list.button.add_cart}">Add to Cart</span>
                             </button>
@@ -88,7 +91,6 @@
                             Back to List
                         </a>
                     </div>
-
                 </div>
             </div>
         </div>

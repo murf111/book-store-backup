@@ -12,12 +12,14 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Get absolute path to the "uploads" folder
-        Path uploadDir = Paths.get("uploads");
-        String uploadPath = uploadDir.toFile().getAbsolutePath();
+        // 1. Get the Project Root Directory dynamically
+        String projectDir = System.getProperty("user.dir");
 
-        // Map URL "/content/**" to the file system path
+        // 2. Build the absolute path to "uploads"
+        Path uploadPath = Paths.get(projectDir, "uploads");
+
+        // 3. Register the resource handler
         registry.addResourceHandler("/content/**")
-                .addResourceLocations("file:/" + uploadPath + "/");
+                .addResourceLocations("file:" + uploadPath.toAbsolutePath() + "/");
     }
 }

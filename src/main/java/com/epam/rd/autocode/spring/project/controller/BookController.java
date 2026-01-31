@@ -124,8 +124,28 @@ public class BookController {
     }
 
     @PatchMapping("/{id}")
-    public String updateBookById(@PathVariable Long id, @ModelAttribute("book") @Valid BookDTO bookDTO) {
-        bookService.updateBookById(id, bookDTO);
+    public String updateBookById(@PathVariable Long id, @ModelAttribute("book") @Valid BookDTO bookDTO,
+                                 BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "books/edit";
+        }
+
+        try {
+            // 1. Handle Image Upload (Logic copied from addBook)
+            if (bookDTO.getImageFile() != null && !bookDTO.getImageFile().isEmpty()) {
+                String fileName = FileUploadUtil.saveFile(bookDTO.getImageFile());
+                bookDTO.setImageUrl(fileName);
+            }
+
+            // 2. Call Service
+            bookService.updateBookById(id, bookDTO);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            bindingResult.reject("error.upload", "Failed to upload image.");
+            return "books/edit";
+        }
+
         return "redirect:/books/" + bookDTO.getName();
     }
 

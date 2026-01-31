@@ -67,19 +67,20 @@ INSERT INTO CLIENTS (id, balance, is_blocked) VALUES
 
 -- BOOKS TABLE
 
-INSERT INTO BOOKS (name, genre, age_group, price, publication_year, author, number_of_pages, characteristics, description, language)
+INSERT INTO BOOKS (name, genre, age_group, price, publication_year, author, number_of_pages, characteristics, description, language, image_url)
 VALUES 
-('The Hidden Treasure', 'Adventure', 'ADULT', 24.99, '2018-05-15', 'Emily White', 400, 'Mysterious journey','An enthralling adventure of discovery', 'ENGLISH'),
-('Echoes of Eternity', 'Fantasy', 'TEEN', 16.50, '2011-01-15', 'Daniel Black', 350, 'Magical realms', 'A spellbinding tale of magic and destiny', 'ENGLISH'),
-('Whispers in the Shadows', 'Mystery', 'ADULT', 29.95, '2018-08-11', 'Sophia Green', 450, 'Intriguing suspense','A gripping mystery that keeps you guessing', 'ENGLISH'),
-('The Starlight Sonata', 'Romance', 'ADULT', 21.75, '2011-05-15', 'Michael Rose', 320, 'Heartwarming love story','A beautiful journey of love and passion', 'ENGLISH'),
-('Beyond the Horizon', 'Science Fiction', 'CHILD', 18.99, '2004-05-15', 'Alex Carter', 280,'Interstellar adventure', 'An epic sci-fi adventure beyond the stars', 'ENGLISH'),
-('Dancing with Shadows', 'Thriller', 'ADULT', 26.50, '2015-05-15', 'Olivia Smith', 380, 'Suspenseful twists','A thrilling tale of danger and intrigue', 'ENGLISH'),
-('Voices in the Wind', 'Historical Fiction', 'ADULT', 32.00, '2017-05-15', 'William Turner', 500,'Rich historical setting', 'A compelling journey through time', 'ENGLISH'),
-('Serenade of Souls', 'Fantasy', 'TEEN', 15.99, '2013-05-15', 'Isabella Reed', 330, 'Enchanting realms','A magical fantasy filled with wonder', 'ENGLISH'),
-('Silent Whispers', 'Mystery', 'ADULT', 27.50, '2021-05-15', 'Benjamin Hall', 420, 'Intricate detective work','A mystery that keeps you on the edge', 'ENGLISH'),
-('Whirlwind Romance', 'Romance', 'OTHER', 23.25, '2022-05-15', 'Emma Turner', 360, 'Passionate love affair','A romance that sweeps you off your feet', 'ENGLISH');
-
+('Harry Potter and the Philosopher''s Stone', 'Fantasy', 'TEEN', 19.99, '1997-06-26', 'J.K. Rowling', 223, 'Hardcover, Magic', 'A young wizard discovers his magical heritage on his eleventh birthday.', 'ENGLISH', 'book1.jpg'),
+('1984', 'Science Fiction', 'ADULT', 14.50, '1949-06-08', 'George Orwell', 328, 'Dystopian, Political', 'A chilling prophecy about the future of a totalitarian regime.', 'ENGLISH', 'book2.jpg'),
+('The Great Gatsby', 'Historical Fiction', 'ADULT', 12.99, '1925-04-10', 'F. Scott Fitzgerald', 180, 'Classic, Jazz Age', 'The story of the fabulously wealthy Jay Gatsby and his love for Daisy Buchanan.', 'ENGLISH', 'book3.jpg'),
+('Dune', 'Science Fiction', 'ADULT', 24.95, '1965-08-01', 'Frank Herbert', 412, 'Epic, Space Opera', 'Set on the desert planet Arrakis, it is the story of the boy Paul Atreides.', 'ENGLISH', 'book4.jpg'),
+('Pride and Prejudice', 'Romance', 'ADULT', 9.99, '1813-01-28', 'Jane Austen', 279, 'Classic, Regency', 'A romantic novel of manners that depicts the British gentry.', 'ENGLISH', 'book5.jpg'),
+('The Hobbit', 'Fantasy', 'CHILD', 15.00, '1937-09-21', 'J.R.R. Tolkien', 310, 'Adventure, Middle-earth', 'Bilbo Baggins, a hobbit, journeys to the Lonely Mountain to reclaim treasure.', 'ENGLISH', 'book6.jpg'),
+('The Da Vinci Code', 'Thriller', 'ADULT', 18.00, '2003-03-18', 'Dan Brown', 489, 'Mystery, Conspiracy', 'A symbologist races to uncover a religious mystery protected by a secret society.', 'ENGLISH', 'book7.jpg'),
+('Murder on the Orient Express', 'Mystery', 'ADULT', 13.50, '1934-01-01', 'Agatha Christie', 256, 'Detective, Crime', 'Hercule Poirot investigates a murder on a luxurious train stopped by snow.', 'ENGLISH', 'book8.jpg'),
+('Charlotte''s Web', 'Adventure', 'CHILD', 8.99, '1952-10-15', 'E.B. White', 192, 'Illustrated, Animals', 'The story of a pig named Wilbur and his friendship with a barn spider named Charlotte.', 'ENGLISH', 'book9.jpg'),
+('The Shining', 'Thriller', 'ADULT', 21.00, '1977-01-28', 'Stephen King', 447, 'Horror, Psychological', 'Jack Torrance takes a job as a caretaker of the isolated Overlook Hotel.', 'ENGLISH', 'book10.jpg'),
+('Kobzar', 'Historical Fiction', 'ADULT', 25.00, '1840-04-18', 'Taras Shevchenko', 115, 'Poetry, Classic', 'A collection of poems that is a monument of Ukrainian literature.', 'UKRAINIAN', 'book11.jpg'),
+('Shadows of Forgotten Ancestors', 'Historical Fiction', 'ADULT', 11.50, '1911-01-01', 'Mykhailo Kotsiubynsky', 200, 'Folklore, Classic', 'A tragic love story set among the Hutsul people of the Carpathian Mountains.', 'UKRAINIAN', 'book12.jpg');
 ------------------------------------------------------------------------------------------------------------------------
 
 -- DYNAMIC SEQUENCE RESET (Works for H2)

@@ -14,19 +14,22 @@ public class FileUploadUtil {
 
     public static String saveFile(MultipartFile file) throws IOException {
         if (file.isEmpty()) {
-            return null; // No image uploaded
+            return null;
         }
 
-        // Create directory if it doesn't exist
-        Path uploadPath = Paths.get("uploads");
+        // 1. Get the Project Root Directory dynamically
+        String projectDir = System.getProperty("user.dir");
+
+        // 2. Build the absolute path to "uploads"
+        Path uploadPath = Paths.get(projectDir, "uploads");
+
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // Generate unique filename (uuid_originalName.jpg) to prevent duplicates
+        // 3. Generate Filename & Save
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
 
-        // Save the file
         try (InputStream inputStream = file.getInputStream()) {
             Path filePath = uploadPath.resolve(fileName);
             Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);

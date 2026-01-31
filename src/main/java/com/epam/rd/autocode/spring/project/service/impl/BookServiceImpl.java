@@ -103,10 +103,13 @@ public class BookServiceImpl implements BookService {
                                           .orElseThrow(() -> new NotFoundException
                                                   ("Book with name " + bookDTO.getName() + " was not found"));
 
+        if (bookDTO.getImageUrl() == null && existingBook.getImageUrl() != null) {
+            bookDTO.setImageUrl(existingBook.getImageUrl());
+        }
+
         modelMapper.map(bookDTO, existingBook);
 
         Book savedBook = bookRepository.save(existingBook);
-
         return modelMapper.map(savedBook, BookDTO.class);
     }
 

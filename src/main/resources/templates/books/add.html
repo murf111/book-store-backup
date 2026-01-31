@@ -74,6 +74,12 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label">Book Cover Image</label>
+                            <input type="file" class="form-control" th:field="*{imageFile}" accept="image/png, image/jpeg">
+                            <div class="form-text text-muted">Formats: JPG, PNG.</div>
+                        </div>
+
+                        <div class="mb-3">
                             <label class="form-label" th:text="#{book.form.label.description}">Description</label>
                             <textarea class="form-control" rows="4" th:field="*{description}"></textarea>
                         </div>

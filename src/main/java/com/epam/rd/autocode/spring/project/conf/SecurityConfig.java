@@ -30,7 +30,7 @@ public class SecurityConfig{
                 .authorizeHttpRequests(auth -> auth
                         // For public (registration & database)
                         .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/content/**").permitAll()
                         .requestMatchers("/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/books/**", "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/clients").permitAll()
