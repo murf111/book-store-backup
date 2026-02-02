@@ -7,40 +7,87 @@
 <body>
 <div th:replace="~{fragments :: navbar}"></div>
 
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
     <h2 class="mb-4" th:text="#{order.title}">Order History</h2>
 
-    <table class="table table-bordered shadow-sm">
-        <thead class="bg-light">
-        <tr>
-            <th th:text="#{order.header.date}">Date</th>
-            <th th:text="#{order.header.total_price}">Total Price</th>
-            <th th:text="#{order.header.status}">Status</th>
-            <th sec:authorize="hasRole('EMPLOYEE')" th:text="#{order.header.action}">Action</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:each="order : ${orders}">
-            <td th:text="${#temporals.format(order.orderDate, 'dd-MM-yyyy HH:mm')}">Date</td>
+    <div th:if="${orders.empty}" class="alert alert-info text-center">
+        <i class="bi bi-inbox me-2"></i> No orders found.
+    </div>
 
-            <td th:text="${'$' + order.price}">Price</td>
+    <div th:unless="${orders.empty}" class="table-responsive">
+        <table class="table table-hover table-bordered shadow-sm align-middle">
+            <thead class="table-light">
+            <tr>
+                <th scope="col" th:text="#{order.header.date}">Date</th>
+                <th scope="col" th:text="#{order.header.delivery}">Delivery Details</th>
+                <th scope="col" th:text="#{order.header.books}">Books</th>
+                <th scope="col" th:text="#{order.header.total_price}">Total Price</th>
+                <th scope="col" th:text="#{order.header.status}">Status</th>
+                <th scope="col" sec:authorize="hasRole('EMPLOYEE')" th:text="#{order.header.action}">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="order : ${orders}">
 
-            <td>
-                <span class="badge"
-                      th:classappend="${order.status == 'CONFIRMED' ? 'bg-success' : 'bg-warning text-dark'}"
-                      th:text="#{ 'order.status.' + ${#strings.toLowerCase(order.status)} }">Status</span>
-            </td>
+                <td class="text-nowrap"
+                    th:text="${#temporals.format(order.orderDate, 'dd-MM-yyyy HH:mm')}">
+                    01-01-2026 12:00
+                </td>
 
-            <td sec:authorize="hasRole('EMPLOYEE')">
-                <form th:if="${order.status == 'PENDING'}"
-                      th:action="@{/orders/{id}/confirm(id=${order.id})}" method="post">
-                    <input type="hidden" name="_method" value="patch"/>
-                    <button type="submit" class="btn btn-success btn-sm" th:text="#{order.button.confirm}">Confirm</button>
-                </form>
-            </td>
-        </tr>
-        </tbody>
-    </table>
+                <td style="min-width: 200px;">
+                    <div th:if="${order.deliveryAddress}">
+                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                        <span class="fw-bold" th:text="${order.deliveryAddress}">123 Main St</span>
+                        <div class="small text-muted ms-3">
+                            <span th:text="${order.city}">City</span>,
+                            <span th:text="${order.postalCode}">00000</span>
+                        </div>
+                    </div>
+                    <div th:unless="${order.deliveryAddress}" class="text-muted fst-italic small">
+                        No delivery info provided
+                    </div>
+                </td>
+
+                <td style="min-width: 250px;">
+                    <ul class="list-unstyled mb-0">
+                        <li th:each="item : ${order.bookItems}" class="mb-1 d-flex align-items-baseline">
+                            <i class="bi bi-book-half text-secondary me-2 small"></i>
+                            <span class="fw-semibold me-2" th:text="${item.bookName}">Book Name</span>
+                            <span class="badge bg-secondary rounded-pill"
+                                  style="font-size: 0.7em;"
+                                  th:text="'x' + ${item.quantity}">x1</span>
+                        </li>
+                    </ul>
+                </td>
+
+                <td class="fw-bold text-success text-nowrap" th:text="${'$' + order.price}">$100.00</td>
+
+                <td>
+                    <span class="badge rounded-pill"
+                          th:classappend="${order.status == 'CONFIRMED' ? 'bg-success' :
+                                          (order.status == 'CANCELED' ? 'bg-danger' : 'bg-warning text-dark')}"
+                          th:text="#{'order.status.' + ${#strings.toLowerCase(order.status)}}">
+                        PENDING
+                    </span>
+                </td>
+
+                <td sec:authorize="hasRole('EMPLOYEE')">
+                    <form th:if="${order.status == 'PENDING'}"
+                          th:action="@{/orders/{id}/confirm(id=${order.id})}" method="post">
+                        <input type="hidden" name="_method" value="patch"/>
+                        <button type="submit" class="btn btn-outline-success btn-sm text-nowrap">
+                            <i class="bi bi-check-lg"></i> <span th:text="#{order.button.confirm}">Confirm</span>
+                        </button>
+                    </form>
+                    <span th:unless="${order.status == 'PENDING'}" class="text-muted small">
+                        <i class="bi bi-dash-lg"></i>
+                    </span>
+                </td>
+
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div th:replace="~{fragments :: footer_scripts}"></div>

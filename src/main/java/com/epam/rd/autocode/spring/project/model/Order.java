@@ -80,4 +80,13 @@ public class Order {
     @Column(nullable = false)
     @Builder.Default
     private OrderStatus status = OrderStatus.PENDING;
+
+    @Column(name = "delivery_address")
+    private String deliveryAddress;
+
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "postal_code")
+    private String postalCode;
 }

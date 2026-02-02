@@ -1,8 +1,11 @@
 package com.epam.rd.autocode.spring.project.model;
 
 import com.epam.rd.autocode.spring.project.model.enums.Role;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.DecimalMin;
@@ -42,6 +45,10 @@ public class Client extends User{
     @Column(name = "IS_BLOCKED", nullable = false)
     @Builder.Default
     private Boolean isBlocked = false;
+
+    @OneToOne(mappedBy = "client", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ToString.Exclude
+    private ShoppingCart shoppingCart;
 
     // Before saving a new Client to DB, automatically set the Role to CLIENT
     @PrePersist

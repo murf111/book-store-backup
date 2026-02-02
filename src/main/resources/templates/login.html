@@ -16,7 +16,23 @@
             <p class="text-muted" th:text="#{login.subheader}">Sign in to your BookStore account</p>
         </div>
 
-        <div th:if="${param.error}" class="alert alert-danger d-flex align-items-center" role="alert">
+        <div th:if="${param.error != null and param.error[0] == 'locked'}" class="alert alert-danger d-flex align-items-center" role="alert">
+            <i class="bi bi-lock-fill me-2"></i>
+            <div>
+                Account locked due to too many failed attempts. <br>
+                Try again in <strong th:text="${param.time != null ? param.time[0] : '15'}">15</strong> minutes.
+            </div>
+        </div>
+
+        <div th:if="${param.error != null and param.error[0] == 'bad_credentials'}" class="alert alert-warning d-flex align-items-center" role="alert">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <div>
+                Invalid email or password. <br>
+                You have <strong th:text="${param.attempts != null ? param.attempts[0] : '0'}"></strong> attempts remaining.
+            </div>
+        </div>
+
+        <div th:if="${param.error != null and param.error[0] == 'true'}" class="alert alert-danger d-flex align-items-center" role="alert">
             <i class="bi bi-exclamation-triangle-fill me-2"></i>
             <div th:text="#{login.error}">Invalid email or password.</div>
         </div>

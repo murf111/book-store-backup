@@ -4,6 +4,8 @@ import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
 import com.epam.rd.autocode.spring.project.model.enums.Language;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
@@ -19,8 +21,8 @@ public interface BookService {
 
     List<BookDTO> getBooksByKeyword(String keyword);
 
-    List<BookDTO> findBooks(String keyword, String genre, BigDecimal minPrice, BigDecimal maxPrice,
-                            AgeGroup ageGroup, Language language, Sort sort);
+    Page<BookDTO> findBooks(String keyword, String genre, BigDecimal minPrice, BigDecimal maxPrice,
+                            AgeGroup ageGroup, Language language, Pageable pageable);
 
     BookDTO addBook(BookDTO book);
 

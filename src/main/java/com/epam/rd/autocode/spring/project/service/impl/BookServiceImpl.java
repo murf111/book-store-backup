@@ -11,6 +11,8 @@ import com.epam.rd.autocode.spring.project.repo.spec.BookSpecification;
 import com.epam.rd.autocode.spring.project.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -65,8 +67,8 @@ public class BookServiceImpl implements BookService {
     }
 
     @Override
-    public List<BookDTO> findBooks(String keyword, String genre, BigDecimal minPrice, BigDecimal maxPrice,
-                                   AgeGroup ageGroup, Language language, Sort sort) {
+    public Page<BookDTO> findBooks(String keyword, String genre, BigDecimal minPrice, BigDecimal maxPrice,
+                                   AgeGroup ageGroup, Language language, Pageable pageable) {
 
         Specification<Book> spec = Specification.where(BookSpecification.hasKeyword(keyword))
                                                 .and(BookSpecification.hasGenre(genre))
@@ -75,11 +77,9 @@ public class BookServiceImpl implements BookService {
                                                 .and(BookSpecification.hasAgeGroup(ageGroup))
                                                 .and(BookSpecification.hasLanguage(language));
 
-        List<Book> books = bookRepository.findAll(spec, sort);
+        Page<Book> bookPage = bookRepository.findAll(spec, pageable);
 
-        return books.stream()
-                    .map(book -> modelMapper.map(book, BookDTO.class))
-                    .toList();
+        return bookPage.map(book -> modelMapper.map(book, BookDTO.class));
     }
 
     @Override

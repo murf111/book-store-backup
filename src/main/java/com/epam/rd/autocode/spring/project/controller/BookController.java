@@ -8,7 +8,11 @@ import com.epam.rd.autocode.spring.project.service.BookService;
 import com.epam.rd.autocode.spring.project.util.FileUploadUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,9 +47,10 @@ public class BookController {
             @RequestParam(required = false) AgeGroup ageGroup,
             @RequestParam(required = false) Language language,
             @RequestParam(required = false, defaultValue = "newest") String sort,
+            @PageableDefault(size = 8) Pageable pageable,
             Model model) {
 
-        // 1. Translate string "sort" param to actual Sort object
+        // Translating string "sort" param to actual Sort object
         Sort sortObj = Sort.unsorted();
         if ("price_asc".equals(sort)) {
             sortObj = Sort.by(Sort.Direction.ASC, "price");
@@ -58,14 +63,15 @@ public class BookController {
             sortObj = Sort.by(Sort.Direction.DESC, "id");
         }
 
-        // 2. Call the service with all parameters
-        List<BookDTO> books = bookService.findBooks(keyword, genre, minPrice, maxPrice, ageGroup, language, sortObj);
+        Pageable customPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortObj);
 
-        model.addAttribute("books", books);
+        Page<BookDTO> bookPage = bookService.findBooks(keyword, genre, minPrice, maxPrice, ageGroup, language, customPageable);
 
-        // Pass params back to view so they stick in the form inputs
-        // (Thymeleaf can usually grab them from param.X, but this is safe)
-        // Note: You don't strictly need to add them to model if you use ${param.keyword} in HTML
+        model.addAttribute("books", bookPage);
+        // Thymeleaf helper variables
+        model.addAttribute("currentPage", bookPage.getNumber());
+        model.addAttribute("totalPages", bookPage.getTotalPages());
+        model.addAttribute("totalItems", bookPage.getTotalElements());
 
         return "books/list";
     }
@@ -131,13 +137,12 @@ public class BookController {
         }
 
         try {
-            // 1. Handle Image Upload (Logic copied from addBook)
+            // Handle Image Upload (Logic copied from addBook)
             if (bookDTO.getImageFile() != null && !bookDTO.getImageFile().isEmpty()) {
                 String fileName = FileUploadUtil.saveFile(bookDTO.getImageFile());
                 bookDTO.setImageUrl(fileName);
             }
 
-            // 2. Call Service
             bookService.updateBookById(id, bookDTO);
 
         } catch (IOException e) {

@@ -17,7 +17,10 @@
                     <i class="bi bi-funnel"></i> <span th:text="#{book.list.filter.title}">Filters</span>
                 </div>
                 <div class="card-body">
+
                     <form th:action="@{/books}" method="get" id="filterForm">
+
+                        <input type="hidden" name="page" id="pageInput" th:value="${currentPage != null ? currentPage : 0}">
 
                         <input type="hidden" name="keyword" th:value="${param.keyword}" th:if="${param.keyword}">
 
@@ -25,13 +28,13 @@
                             <label class="form-label small text-muted" th:text="#{book.form.label.genre}">Genre</label>
                             <select class="form-select" name="genre">
                                 <option value="" th:text="#{book.list.filter.all_genres}">All Genres</option>
-                                <option value="Fantasy" th:selected="${param.genre == 'Fantasy'}">Fantasy</option>
-                                <option value="Adventure" th:selected="${param.genre == 'Adventure'}">Adventure</option>
-                                <option value="Romance" th:selected="${param.genre == 'Romance'}">Romance</option>
-                                <option value="Mystery" th:selected="${param.genre == 'Mystery'}">Mystery</option>
-                                <option value="Science Fiction" th:selected="${param.genre == 'Science Fiction'}">Science Fiction</option>
-                                <option value="Thriller" th:selected="${param.genre == 'Thriller'}">Thriller</option>
-                                <option value="Historical Fiction" th:selected="${param.genre == 'Historical Fiction'}">Historical</option>
+                                <option value="Fantasy" th:selected="${param.genre != null && param.genre[0] == 'Fantasy'}">Fantasy</option>
+                                <option value="Adventure" th:selected="${param.genre != null && param.genre[0] == 'Adventure'}">Adventure</option>
+                                <option value="Romance" th:selected="${param.genre != null && param.genre[0] == 'Romance'}">Romance</option>
+                                <option value="Mystery" th:selected="${param.genre != null && param.genre[0] == 'Mystery'}">Mystery</option>
+                                <option value="Science Fiction" th:selected="${param.genre != null && param.genre[0] == 'Science Fiction'}">Science Fiction</option>
+                                <option value="Thriller" th:selected="${param.genre != null && param.genre[0] == 'Thriller'}">Thriller</option>
+                                <option value="Historical Fiction" th:selected="${param.genre != null && param.genre[0] == 'Historical Fiction'}">Historical</option>
                             </select>
                         </div>
 
@@ -72,7 +75,10 @@
                         </div>
 
                         <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-sm" th:text="#{book.list.filter.apply}">Apply Filters</button>
+                            <button type="submit" class="btn btn-primary btn-sm"
+                                    onclick="document.getElementById('pageInput').value=0"
+                                    th:text="#{book.list.filter.apply}">Apply Filters</button>
+
                             <a th:href="@{/books}" class="btn btn-outline-secondary btn-sm" th:text="#{book.list.filter.clear}">Clear All</a>
                         </div>
                     </form>
@@ -95,6 +101,9 @@
                     <span th:if="${param.keyword}" class="text-muted fs-6 ms-2">
                          <span th:text="#{book.list.search_results}">Results for:</span> "<span th:text="${param.keyword}"></span>"
                     </span>
+                    <span class="text-muted fs-6 ms-2" th:if="${totalItems > 0}">
+                        (<span th:text="${totalItems}">0</span> found)
+                    </span>
                 </h4>
 
                 <div class="d-flex align-items-center gap-2">
@@ -106,22 +115,23 @@
                     </div>
 
                     <select class="form-select form-select-sm" name="sort" form="filterForm"
-                            onchange="this.form.submit()" style="min-width: 160px; cursor: pointer;">
-                        <option value="newest" th:selected="${param.sort == 'newest'}" th:text="#{book.list.sort.newest}">Newest Arrivals</option>
-                        <option value="price_asc" th:selected="${param.sort == 'price_asc'}" th:text="#{book.list.sort.price_asc}">Price: Low to High</option>
-                        <option value="price_desc" th:selected="${param.sort == 'price_desc'}" th:text="#{book.list.sort.price_desc}">Price: High to Low</option>
-                        <option value="name_asc" th:selected="${param.sort == 'name_asc'}" th:text="#{book.list.sort.name_asc}">Name: A-Z</option>
+                            onchange="document.getElementById('pageInput').value=0; this.form.submit()"
+                            style="min-width: 160px; cursor: pointer;">
+                        <option value="newest" th:selected="${param.sort == null || param.sort[0] == 'newest'}" th:text="#{book.list.sort.newest}">Newest Arrivals</option>
+                        <option value="price_asc" th:selected="${param.sort != null && param.sort[0] == 'price_asc'}" th:text="#{book.list.sort.price_asc}">Price: Low to High</option>
+                        <option value="price_desc" th:selected="${param.sort != null && param.sort[0] == 'price_desc'}" th:text="#{book.list.sort.price_desc}">Price: High to Low</option>
+                        <option value="name_asc" th:selected="${param.sort != null && param.sort[0] == 'name_asc'}" th:text="#{book.list.sort.name_asc}">Name: A-Z</option>
                     </select>
                 </div>
             </div>
 
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
 
-                <div class="col" th:each="book : ${books}">
+                <div class="col" th:each="book : ${books.content}">
                     <div th:replace="~{fragments :: bookCard(book=${book})}"></div>
                 </div>
 
-                <div class="col-12 text-center py-5" th:if="${books.empty}">
+                <div class="col-12 text-center py-5" th:if="${books.totalElements == 0}">
                     <div class="text-muted opacity-25 mb-3">
                         <i class="bi bi-emoji-frown display-1"></i>
                     </div>
@@ -130,6 +140,43 @@
                     <a th:href="@{/books}" class="btn btn-outline-secondary btn-sm mt-2" th:text="#{book.list.empty.button}">Clear Filters</a>
                 </div>
 
+            </div>
+
+            <div th:if="${totalPages > 1}" class="d-flex justify-content-center mt-5 mb-5">
+                <nav aria-label="Page navigation">
+                    <ul class="pagination">
+
+                        <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                            <button class="page-link"
+                                    th:onclick="'document.getElementById(\'pageInput\').value=' + ${currentPage - 1} + '; document.getElementById(\'filterForm\').submit();'">
+                                <span aria-hidden="true">&laquo;</span>
+                            </button>
+                        </li>
+
+                        <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                            th:classappend="${currentPage == i} ? 'active'"
+                            th:if="${totalPages <= 10 || (i == 0 || i == totalPages - 1 || (i >= currentPage - 2 && i <= currentPage + 2))}">
+
+                            <button class="page-link"
+                                    th:text="${i + 1}"
+                                    th:onclick="'document.getElementById(\'pageInput\').value=' + ${i} + '; document.getElementById(\'filterForm\').submit();'">
+                                1
+                            </button>
+
+                        </li>
+
+                        <li class="page-item disabled" th:if="${totalPages > 10 && currentPage < totalPages - 4}">
+                            <span class="page-link">...</span>
+                        </li>
+
+                        <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                            <button class="page-link"
+                                    th:onclick="'document.getElementById(\'pageInput\').value=' + ${currentPage + 1} + '; document.getElementById(\'filterForm\').submit();'">
+                                <span aria-hidden="true">&raquo;</span>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>

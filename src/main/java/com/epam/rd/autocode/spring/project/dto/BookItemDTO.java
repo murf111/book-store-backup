@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class BookItemDTO {
 
+    private Long bookId;
+
     @NotBlank
     private String bookName;
 

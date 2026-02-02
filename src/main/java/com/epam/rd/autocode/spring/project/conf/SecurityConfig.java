@@ -7,10 +7,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -18,10 +20,12 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig{
 
     private final UserDetailsService userDetailsService;
+    private final CustomAuthFailureHandler failureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,6 +36,8 @@ public class SecurityConfig{
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/content/**").permitAll()
                         .requestMatchers("/register").permitAll()
+                        .requestMatchers("/login").permitAll()
+
                         .requestMatchers(HttpMethod.GET, "/books/**", "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/clients").permitAll()
 
@@ -57,10 +63,10 @@ public class SecurityConfig{
                 )
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(form -> form
-                        .loginPage("/login")           // The URL of your custom page
+                        .loginPage("/login")           // The URL of custom page
                         .loginProcessingUrl("/login")  // The URL where the form POSTs data
                         .defaultSuccessUrl("/", true)  // Redirect to Home after success
-                        .failureUrl("/login?error=true") // Redirect here on bad password
+                        .failureHandler(failureHandler) // Redirect here on bad password
                         .permitAll()
                 )
                 .logout(logout -> logout

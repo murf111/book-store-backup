@@ -4,6 +4,8 @@ import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Client;
+import com.epam.rd.autocode.spring.project.model.ShoppingCart;
+import com.epam.rd.autocode.spring.project.repo.CartRepository;
 import com.epam.rd.autocode.spring.project.repo.ClientRepository;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ClientServiceImpl implements ClientService {
     private final ClientRepository clientRepository;
+    private final CartRepository cartRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
 
@@ -72,10 +75,16 @@ public class ClientServiceImpl implements ClientService {
             throw new AlreadyExistException("Client already exists with email: " + client.getEmail());
         }
         Client newClient = modelMapper.map(client, Client.class);
-
         newClient.setPassword(passwordEncoder.encode(newClient.getPassword()));
 
+        ShoppingCart cart = ShoppingCart.builder()
+                                        .client(newClient)
+                                        .build();
+
+        newClient.setShoppingCart(cart);
+
         Client savedClient = clientRepository.save(newClient);
+
         return modelMapper.map(savedClient, ClientDTO.class);
     }
 

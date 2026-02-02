@@ -29,7 +29,7 @@ public class OrderController {
         String email = authentication.getName();
 
         if (authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_EMPLOYEE"))) {
-            model.addAttribute("orders", orderService.getAllOrders()); // Or create a getAllOrders for admin
+            model.addAttribute("orders", orderService.getAllOrders());
         } else {
             model.addAttribute("orders", orderService.getOrdersByClient(email));
         }

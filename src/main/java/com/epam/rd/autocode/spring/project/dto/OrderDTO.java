@@ -39,4 +39,10 @@ public class OrderDTO{
 
     @NotNull
     private String status;
+
+    private String deliveryAddress;
+
+    private String city;
+
+    private String postalCode;
 }

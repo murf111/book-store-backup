@@ -21,6 +21,8 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.SuperBuilder;
 
+import java.time.LocalDateTime;
+
 /**
  * Represents a base entity representing a system user.
  * <p>
@@ -60,4 +62,11 @@ public abstract class User {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     protected Role role;
+
+    // Limiting failed login attempts
+    @Column(name = "failed_attempts")
+    private Integer failedAttempts = 0;
+
+    @Column(name = "lock_time")
+    private LocalDateTime lockTime;
 }

@@ -13,6 +13,7 @@ import com.epam.rd.autocode.spring.project.repo.BookRepository;
 import com.epam.rd.autocode.spring.project.repo.ClientRepository;
 import com.epam.rd.autocode.spring.project.repo.EmployeeRepository;
 import com.epam.rd.autocode.spring.project.repo.OrderRepository;
+import com.epam.rd.autocode.spring.project.service.CartService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -39,6 +40,7 @@ public class OrderServiceImpl implements OrderService {
     private final EmployeeRepository employeeRepository;
     private final BookRepository bookRepository;
     private final ModelMapper modelMapper;
+    private final CartService cartService;
 
     @Override
     public List<OrderDTO> getAllOrders() {
@@ -98,21 +100,22 @@ public class OrderServiceImpl implements OrderService {
         order.setClient(client);
         order.setEmployee(null);
 
+        order.setDeliveryAddress(orderDTO.getDeliveryAddress());
+        order.setCity(orderDTO.getCity());
+        order.setPostalCode(orderDTO.getPostalCode());
+
         List<BookItem> bookItems = new ArrayList<>();
         BigDecimal totalPrice = BigDecimal.ZERO;
 
         if (orderDTO.getBookItems() != null) {
             for (BookItemDTO bookItemDTO : orderDTO.getBookItems()) {
-                Book book = bookRepository.findByName(bookItemDTO.getBookName())
+                Book book = bookRepository.findById(bookItemDTO.getBookId())
                                           .orElseThrow(() -> new NotFoundException
-                                                          ("Book with name " +
-                                                           bookItemDTO.getBookName() +
-                                                           " was not found"));
+                                                          ("Book " + bookItemDTO.getBookId() + " was not found"));
                 BookItem bookItem = new BookItem();
                 bookItem.setBook(book);
                 bookItem.setOrder(order);
                 bookItem.setQuantity(bookItemDTO.getQuantity());
-
                 bookItems.add(bookItem);
 
                 BigDecimal itemCost = book.getPrice().multiply(BigDecimal.valueOf(bookItemDTO.getQuantity()));
@@ -121,6 +124,15 @@ public class OrderServiceImpl implements OrderService {
         }
         order.setBookItems(bookItems);
         order.setPrice(totalPrice);
+
+        if (client.getRole() == com.epam.rd.autocode.spring.project.model.enums.Role.CLIENT) {
+            if (client.getBalance().compareTo(totalPrice) < 0) {
+                throw new RuntimeException("Insufficient funds! Balance: " + client.getBalance() + ", Total: " + totalPrice);
+            }
+            // Deduct money
+            client.setBalance(client.getBalance().subtract(totalPrice));
+            clientRepository.save(client); // Save the new balance
+        }
 
         Order savedOrder = orderRepository.save(order);
 
@@ -140,8 +152,6 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.CONFIRMED);
         order.setEmployee(employee);
         Order savedOrder = orderRepository.save(order);
-        // HERE IS THE PROBLEM BECAUSE I SET NULL INSIDE addOrder but then I never change it
-        // handled the problem
 
         return modelMapper.map(savedOrder, OrderDTO.class);
     }

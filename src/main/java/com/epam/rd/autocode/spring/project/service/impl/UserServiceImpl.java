@@ -1,6 +1,8 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.dto.UserDTO;
+import com.epam.rd.autocode.spring.project.model.Client;
+import com.epam.rd.autocode.spring.project.model.Employee;
 import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.repo.UserRepository;
 import com.epam.rd.autocode.spring.project.service.UserService;
@@ -11,6 +13,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
 
 
 @Service
@@ -33,9 +38,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updateName(String newName) {
-        User user = getUserEntity();
-        user.setName(newName);
+    @Transactional
+    public void updatePersonalData(String email, String name, BigDecimal balance, String phone, LocalDate birthDate) {
+        User user = userRepository.findByEmail(email)
+                                  .orElseThrow(() -> new RuntimeException("User not found: " + email));
+
+        user.setName(name);
+
+        // Update Client-specific fields
+        if (user instanceof Client client) {
+            // Only update if value is not null
+            if (balance != null) {
+                client.setBalance(balance);
+            }
+        }
+        // Update Employee-specific fields
+        else if (user instanceof Employee employee) {
+            if (phone != null && !phone.isBlank()) {
+                employee.setPhone(phone);
+            }
+            if (birthDate != null) {
+                employee.setBirthDate(birthDate);
+            }
+        }
+
         userRepository.save(user);
     }
 

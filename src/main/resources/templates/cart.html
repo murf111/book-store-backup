@@ -28,13 +28,42 @@
             </thead>
             <tbody>
             <tr th:each="item : ${items}">
-                <td th:text="${item.bookDTO.name}">Dune</td>
-                <td th:text="${'$' + item.bookDTO.price}">$10.00</td>
-                <td th:text="${item.quantity}">1</td>
-                <td th:text="${'$' + (item.bookDTO.price * item.quantity)}">$10.00</td>
+
                 <td>
-                    <form th:action="@{/cart/{id}(id=${item.bookDTO.id})}" th:method="delete">
-                        <button type="submit" class="btn btn-danger btn-sm" th:text="#{cart.button.remove}">Remove</button>
+                    <div class="d-flex align-items-center">
+                        <img th:src="@{'/content/' + ${item.bookDTO.imageUrl}}"
+                             alt="Book Cover"
+                             class="img-thumbnail me-3"
+                             style="width: 50px; height: 75px; object-fit: cover;">
+
+                        <div>
+                            <h6 class="mb-0" th:text="${item.bookDTO.name}">Book Title</h6>
+                            <small class="text-muted" th:text="${item.bookDTO.author}">Author Name</small>
+                        </div>
+                    </div>
+                </td>
+
+                <td class="align-middle" th:text="${'$' + item.bookDTO.price}">$10.00</td>
+
+                <td class="align-middle" style="min-width: 120px;">
+                    <div class="d-flex justify-content-start align-items-center">
+                        <form th:action="@{/cart/decrease/{id}(id=${item.bookDTO.id})}" method="post" class="m-0">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm" style="width: 30px;">-</button>
+                        </form>
+                        <span class="mx-2 font-weight-bold" th:text="${item.quantity}">1</span>
+                        <form th:action="@{/cart/add/{id}(id=${item.bookDTO.id})}" method="post" class="m-0">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm" style="width: 30px;">+</button>
+                        </form>
+                    </div>
+                </td>
+
+                <td class="align-middle" th:text="${'$' + item.totalPrice}">$10.00</td>
+
+                <td class="align-middle">
+                    <form th:action="@{/cart/item/{id}(id=${item.bookDTO.id})}" th:method="delete">
+                        <button type="submit" class="btn btn-danger btn-sm" th:text="#{cart.button.remove}">
+                            <i class="bi bi-trash"></i> Remove
+                        </button>
                     </form>
                 </td>
             </tr>
@@ -52,9 +81,9 @@
                 <button type="submit" class="btn btn-warning" th:text="#{cart.button.clear}">Clear Cart</button>
             </form>
 
-            <form th:action="@{/cart/checkout}" method="post">
-                <button type="submit" class="btn btn-success btn-lg" th:text="#{cart.button.checkout}">Place Order</button>
-            </form>
+            <a th:href="@{/cart/checkout}" class="btn btn-success btn-lg">
+                <span th:text="#{cart.button.checkout}">Proceed to Checkout</span> <i class="bi bi-arrow-right"></i>
+            </a>
         </div>
     </div>
 </div>
