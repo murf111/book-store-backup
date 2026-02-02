@@ -1,13 +1,13 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
+import com.epam.rd.autocode.spring.project.annotation.Sensitive;
 import com.epam.rd.autocode.spring.project.dto.UserDTO;
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.Employee;
 import com.epam.rd.autocode.spring.project.model.User;
-import com.epam.rd.autocode.spring.project.repo.UserRepository;
+import com.epam.rd.autocode.spring.project.repository.UserRepository;
 import com.epam.rd.autocode.spring.project.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.modelmapper.ModelMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -66,7 +66,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean changePassword(String currentPassword, String newPassword) {
+    public boolean changePassword(@Sensitive String currentPassword, @Sensitive String newPassword) {
         User user = getUserEntity();
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {

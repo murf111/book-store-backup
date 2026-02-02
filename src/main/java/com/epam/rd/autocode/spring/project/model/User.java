@@ -56,6 +56,7 @@ public abstract class User {
 
     @NotBlank
     @Column(nullable = false)
+    @ToString.Exclude
     private String password; // Stores the BCrypt Hash, NOT password itself
 
     @NotNull

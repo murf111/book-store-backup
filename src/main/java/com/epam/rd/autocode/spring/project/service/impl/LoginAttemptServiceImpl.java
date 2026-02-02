@@ -1,7 +1,7 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.model.User;
-import com.epam.rd.autocode.spring.project.repo.UserRepository;
+import com.epam.rd.autocode.spring.project.repository.UserRepository;
 import com.epam.rd.autocode.spring.project.service.LoginAttemptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

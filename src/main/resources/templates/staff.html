@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments :: header_css}">
+    <title th:text="#{staff.title}">Staff Management</title>
+</head>
+<body>
+
+<div th:replace="~{fragments :: navbar}"></div>
+
+<div class="container mt-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0" th:text="#{staff.title}">Staff Management</h2>
+
+        <div sec:authorize="hasRole('EMPLOYEE')">
+            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
+                <i class="bi bi-person-plus-fill"></i> <span th:text="#{staff.button.hire}">Hire New Employee</span>
+            </button>
+        </div>
+    </div>
+
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="#{${successMessage}}">Success!</span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div th:if="${errorMessage}" class="alert alert-danger shadow-sm" th:text="${errorMessage}"></div>
+
+    <div th:if="${#fields.hasErrors('${newEmployee.*}')}" class="alert alert-warning shadow-sm">
+        <span th:text="#{staff.error.check_form}">Please check the form for errors.</span>
+    </div>
+
+    <div class="table-responsive shadow-sm">
+        <table class="table table-striped table-hover mb-0">
+            <thead class="table-dark">
+            <tr>
+                <th th:text="#{label.name}">Name</th>
+                <th th:text="#{label.email}">Email</th>
+                <th th:text="#{label.phone}">Phone</th>
+                <th th:text="#{label.birthdate}">Birth Date</th>
+                <th sec:authorize="hasRole('EMPLOYEE')" th:text="#{column.actions}">Action</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="emp : ${employees}">
+                <td th:text="${emp.name}">Name</td>
+                <td th:text="${emp.email}">email@store.com</td>
+                <td th:text="${emp.phone}">555-1234</td>
+                <td th:text="${emp.birthDate}">2000-01-01</td>
+
+                <td sec:authorize="hasRole('EMPLOYEE')">
+                    <form th:action="@{/staff/{email}(email=${emp.email})}" th:method="delete">
+                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                th:onclick="'return confirm(\'' + #{staff.confirm_fire} + '\');'"
+                                th:text="#{staff.button.fire}">
+                            Fire
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div sec:authorize="hasRole('EMPLOYEE')" class="modal fade" id="addEmployeeModal" tabindex="-1"
+     aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form th:action="@{/staff/add}" method="post" th:object="${newEmployee}" class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="addModalLabel" th:text="#{staff.modal.title}">Hire Employee</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label" th:text="#{label.name}">Name</label>
+                    <input type="text" th:field="*{name}" class="form-control"
+                           th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" th:text="#{label.email}">Email</label>
+                    <input type="email" th:field="*{email}" class="form-control"
+                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" th:text="#{label.phone}">Phone</label>
+                    <input type="text" th:field="*{phone}" class="form-control"
+                           th:classappend="${#fields.hasErrors('phone')} ? 'is-invalid'" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('phone')}" th:errors="*{phone}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" th:text="#{label.birthdate}">Birth Date</label>
+                    <input type="date" th:field="*{birthDate}" class="form-control"
+                           th:classappend="${#fields.hasErrors('birthDate')} ? 'is-invalid'" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('birthDate')}" th:errors="*{birthDate}"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label" th:text="#{label.password}">Password</label>
+                    <input type="password" th:field="*{password}" class="form-control"
+                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'" required>
+                    <div class="invalid-feedback" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{staff.modal.close}">Close</button>
+                <button type="submit" class="btn btn-success" th:text="#{staff.modal.save}">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{fragments :: footer_scripts}"></div>
+
+<script th:if="${#fields.hasErrors('${newEmployee.*}')}">
+    var myModal = new bootstrap.Modal(document.getElementById('addEmployeeModal'));
+    myModal.show();
+</script>
+
+</body>
+</html>

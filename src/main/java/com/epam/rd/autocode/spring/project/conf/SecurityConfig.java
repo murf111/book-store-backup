@@ -49,6 +49,7 @@ public class SecurityConfig{
                         .requestMatchers(HttpMethod.GET, "/clients/**").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.PATCH, "/clients/*/block").hasRole("EMPLOYEE")
                         .requestMatchers("/orders/*/confirm").hasRole("EMPLOYEE")
+
                         // Restrict the "Add" and "Edit" pages to Employees only
                         .requestMatchers("/books/add", "/books/*/edit").hasRole("EMPLOYEE")
 

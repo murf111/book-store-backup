@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.service.impl;
 
 import com.epam.rd.autocode.spring.project.dto.BookItemDTO;
 import com.epam.rd.autocode.spring.project.dto.OrderDTO;
+import com.epam.rd.autocode.spring.project.exception.InsufficientFundsException;
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Book;
 import com.epam.rd.autocode.spring.project.model.BookItem;
@@ -9,10 +10,10 @@ import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.Employee;
 import com.epam.rd.autocode.spring.project.model.Order;
 import com.epam.rd.autocode.spring.project.model.enums.OrderStatus;
-import com.epam.rd.autocode.spring.project.repo.BookRepository;
-import com.epam.rd.autocode.spring.project.repo.ClientRepository;
-import com.epam.rd.autocode.spring.project.repo.EmployeeRepository;
-import com.epam.rd.autocode.spring.project.repo.OrderRepository;
+import com.epam.rd.autocode.spring.project.repository.BookRepository;
+import com.epam.rd.autocode.spring.project.repository.ClientRepository;
+import com.epam.rd.autocode.spring.project.repository.EmployeeRepository;
+import com.epam.rd.autocode.spring.project.repository.OrderRepository;
 import com.epam.rd.autocode.spring.project.service.CartService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Implementation of {@link OrderService}.
@@ -41,6 +41,8 @@ public class OrderServiceImpl implements OrderService {
     private final BookRepository bookRepository;
     private final ModelMapper modelMapper;
     private final CartService cartService;
+
+    private final EmailServiceImpl emailService;
 
     @Override
     public List<OrderDTO> getAllOrders() {
@@ -127,7 +129,7 @@ public class OrderServiceImpl implements OrderService {
 
         if (client.getRole() == com.epam.rd.autocode.spring.project.model.enums.Role.CLIENT) {
             if (client.getBalance().compareTo(totalPrice) < 0) {
-                throw new RuntimeException("Insufficient funds! Balance: " + client.getBalance() + ", Total: " + totalPrice);
+                throw new InsufficientFundsException("Insufficient funds! Balance: " + client.getBalance() + ", Total: " + totalPrice);
             }
             // Deduct money
             client.setBalance(client.getBalance().subtract(totalPrice));
@@ -153,6 +155,11 @@ public class OrderServiceImpl implements OrderService {
         order.setEmployee(employee);
         Order savedOrder = orderRepository.save(order);
 
-        return modelMapper.map(savedOrder, OrderDTO.class);
+        OrderDTO result = modelMapper.map(savedOrder, OrderDTO.class);
+        emailService.sendOrderConfirmation(result); // Pass the mapped DTO
+
+        return result;
+
+        //return modelMapper.map(savedOrder, OrderDTO.class);
     }
 }
