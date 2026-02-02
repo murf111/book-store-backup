@@ -3,7 +3,6 @@ package com.epam.rd.autocode.spring.project.controller;
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.dto.RegistrationDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
-import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
