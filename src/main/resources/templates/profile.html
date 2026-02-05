@@ -32,6 +32,15 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
 
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <div class="card shadow-sm border-0 mb-4">
                 <div class="card-header bg-white py-3">
                     <h5 class="mb-0 fw-bold" th:text="#{profile.section.personal}">Personal Information</h5>
@@ -61,8 +70,11 @@
                                 <label class="form-label" th:text="#{profile.client.header.balance}">Balance</label>
                                 <div class="input-group">
                                     <span class="input-group-text">$</span>
-                                    <input type="number" step="0.01" name="balance" class="form-control"
-                                           th:value="${user.balance}" placeholder="0.00">
+                                    <input type="text" class="form-control" th:value="${user.balance}" disabled readonly>
+
+                                    <button type="button" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#topUpModal">
+                                        <i class="bi bi-plus-circle"></i> <span th:text="#{profile.topup}">Top Up</span>
+                                    </button>
                                 </div>
                             </div>
                         </th:block>
@@ -140,6 +152,54 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="topUpModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-credit-card"></i> <span th:text="#{profile.topup.title}">Add Funds</span>
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form th:action="@{/profile/topup}" th:object="${paymentRequest}" method="post">
+                <div class="modal-body">
+                    <p class="text-muted small" th:text="#{profile.topup.subtitle}">Enter your payment details below.</p>
+
+                    <div class="mb-3">
+                        <label class="form-label" th:text="#{profile.topup.label.amount}">Amount ($)</label>
+                        <input type="number" step="1.00" class="form-control" th:field="*{amount}" required placeholder="50.00">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" th:text="#{profile.topup.label.card}">Card Number</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-credit-card-2-front"></i></span>
+                            <input type="text" class="form-control" th:field="*{cardNumber}" placeholder="0000 0000 0000 0000" maxlength="16" required>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label" th:text="#{profile.topup.label.expiry}">Expiry (MM/YY)</label>
+                            <input type="text" class="form-control" th:field="*{expirationDate}" placeholder="12/26" required>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label" th:text="#{profile.topup.label.cvv}">CVV</label>
+                            <input type="password" class="form-control" th:field="*{cvv}" placeholder="123" maxlength="3" required>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" th:text="#{profile.topup.button.cancel}">Cancel</button>
+                    <button type="submit" class="btn btn-success" th:text="#{profile.topup.button.pay}">Pay Securely</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

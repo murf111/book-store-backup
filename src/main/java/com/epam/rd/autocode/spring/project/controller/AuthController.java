@@ -4,6 +4,7 @@ import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.dto.RegistrationDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.service.ClientService;
+import com.epam.rd.autocode.spring.project.util.ViewNames;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.math.BigDecimal;
 
+import static com.epam.rd.autocode.spring.project.util.Routes.REGISTER;
+
 @Controller
-@RequestMapping("/register")
+@RequestMapping(REGISTER)
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -26,14 +29,14 @@ public class AuthController {
     @GetMapping
     public String showRegistrationForm(Model model) {
         model.addAttribute("client", new RegistrationDTO());
-        return "register";
+        return ViewNames.VIEW_REGISTER;
     }
 
     @PostMapping
     public String registerClient(@ModelAttribute("client") @Valid RegistrationDTO registrationDTO,
                                  BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "register";
+            return ViewNames.VIEW_REGISTER;
         }
 
         try {
@@ -48,9 +51,9 @@ public class AuthController {
             clientService.addClient(clientDTO);
         } catch (AlreadyExistException e) {
             bindingResult.rejectValue("email", "error.client", "An account already exists for this email.");
-            return "register";
+            return ViewNames.VIEW_REGISTER;
         }
 
-        return "redirect:/login?registerSuccess";
+        return ViewNames.REDIRECT_LOGIN + "?registerSuccess";
     }
 }

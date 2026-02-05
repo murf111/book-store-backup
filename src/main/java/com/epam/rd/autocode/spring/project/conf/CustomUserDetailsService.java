@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.conf;
 
+import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.repository.UserRepository;
@@ -8,11 +9,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
+// Check if really in package conf or service/security
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
@@ -21,9 +22,9 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final LoginAttemptService loginAttemptService;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws NotFoundException {
         User user = userRepository.findByEmail(email)
-                                  .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+                                  .orElseThrow(() -> new NotFoundException("User not found: " + email));
 
         // 1. Check if blocked by Employee
         boolean isBlockedByAdmin = false;

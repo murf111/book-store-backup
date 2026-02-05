@@ -1,8 +1,8 @@
 package com.epam.rd.autocode.spring.project.service.impl;
 
-import com.epam.rd.autocode.spring.project.annotation.Sensitive;
+import com.epam.rd.autocode.spring.project.annotation.LogMask;
 import com.epam.rd.autocode.spring.project.dto.UserDTO;
-import com.epam.rd.autocode.spring.project.model.Client;
+import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Employee;
 import com.epam.rd.autocode.spring.project.model.User;
 import com.epam.rd.autocode.spring.project.repository.UserRepository;
@@ -14,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 
@@ -39,21 +38,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updatePersonalData(String email, String name, BigDecimal balance, String phone, LocalDate birthDate) {
+    public void updatePersonalData(String email, String name, String phone, LocalDate birthDate) {
         User user = userRepository.findByEmail(email)
-                                  .orElseThrow(() -> new RuntimeException("User not found: " + email));
+                                  .orElseThrow(() -> new NotFoundException("User not found: " + email));
 
         user.setName(name);
 
-        // Update Client-specific fields
-        if (user instanceof Client client) {
-            // Only update if value is not null
-            if (balance != null) {
-                client.setBalance(balance);
-            }
-        }
         // Update Employee-specific fields
-        else if (user instanceof Employee employee) {
+        if (user instanceof Employee employee) {
             if (phone != null && !phone.isBlank()) {
                 employee.setPhone(phone);
             }
@@ -66,7 +58,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean changePassword(@Sensitive String currentPassword, @Sensitive String newPassword) {
+    public boolean changePassword(@LogMask String currentPassword, @LogMask String newPassword) {
         User user = getUserEntity();
 
         if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
@@ -88,6 +80,6 @@ public class UserServiceImpl implements UserService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
         return userRepository.findByEmail(email)
-                             .orElseThrow(() -> new RuntimeException("User not found: " + email));
+                             .orElseThrow(() -> new NotFoundException("User not found: " + email));
     }
 }

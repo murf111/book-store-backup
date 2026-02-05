@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.service.ClientService;
+import com.epam.rd.autocode.spring.project.util.ViewNames;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,8 +17,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import static com.epam.rd.autocode.spring.project.util.Routes.CLIENTS;
+
 @Controller
-@RequestMapping("/clients")
+@RequestMapping(CLIENTS)
 @RequiredArgsConstructor
 public class ClientController {
     private final ClientService clientService;
@@ -25,7 +28,7 @@ public class ClientController {
     @GetMapping
     public String getAllClients(Model model) {
         model.addAttribute("clients", clientService.getAllClients());
-        return "clients";
+        return ViewNames.VIEW_CLIENTS;
     }
 
     @GetMapping("/{email}")
@@ -36,7 +39,7 @@ public class ClientController {
     @PostMapping
     public String addClient(@ModelAttribute @Valid ClientDTO clientDTO) {
         ClientDTO client = clientService.addClient(clientDTO);
-        return "redirect:/login";
+        return ViewNames.REDIRECT_LOGIN;
     }
 
     @PatchMapping("/{email}")
@@ -53,6 +56,6 @@ public class ClientController {
     @PatchMapping("/{email}/block")
     public String blockClient(@PathVariable String email, @RequestParam boolean block) {
         clientService.blockClient(email, block);
-        return "redirect:/clients";
+        return ViewNames.REDIRECT_CLIENTS;
     }
 }

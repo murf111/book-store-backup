@@ -1,6 +1,6 @@
 package com.epam.rd.autocode.spring.project.aspect;
 
-import com.epam.rd.autocode.spring.project.annotation.Sensitive;
+import com.epam.rd.autocode.spring.project.annotation.LogMask;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.AfterThrowing;
@@ -39,9 +39,9 @@ public class LoggingAspect {
 
         List<String> safeArgs = new ArrayList<>();
 
-        // Loop through args to check for @Sensitive
+        // Loop through args to check for @LogMask
         for (int i = 0; i < args.length; i++) {
-            if (parameters[i].isAnnotationPresent(Sensitive.class)) {
+            if (parameters[i].isAnnotationPresent(LogMask.class)) {
                 safeArgs.add(parameters[i].getName() + "=[***PROTECTED***]");
             } else {
                 safeArgs.add(String.valueOf(args[i]));

@@ -15,6 +15,7 @@ import com.epam.rd.autocode.spring.project.repository.ClientRepository;
 import com.epam.rd.autocode.spring.project.repository.EmployeeRepository;
 import com.epam.rd.autocode.spring.project.repository.OrderRepository;
 import com.epam.rd.autocode.spring.project.service.CartService;
+import com.epam.rd.autocode.spring.project.service.EmailService;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -42,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
     private final ModelMapper modelMapper;
     private final CartService cartService;
 
-    private final EmailServiceImpl emailService;
+    private final EmailService emailService;
 
     @Override
     public List<OrderDTO> getAllOrders() {
@@ -129,7 +130,10 @@ public class OrderServiceImpl implements OrderService {
 
         if (client.getRole() == com.epam.rd.autocode.spring.project.model.enums.Role.CLIENT) {
             if (client.getBalance().compareTo(totalPrice) < 0) {
-                throw new InsufficientFundsException("Insufficient funds! Balance: " + client.getBalance() + ", Total: " + totalPrice);
+                throw new InsufficientFundsException("Insufficient funds! Balance: "
+                                                     + client.getBalance()
+                                                     + ", Total: "
+                                                     + totalPrice);
             }
             // Deduct money
             client.setBalance(client.getBalance().subtract(totalPrice));
@@ -159,7 +163,5 @@ public class OrderServiceImpl implements OrderService {
         emailService.sendOrderConfirmation(result); // Pass the mapped DTO
 
         return result;
-
-        //return modelMapper.map(savedOrder, OrderDTO.class);
     }
 }

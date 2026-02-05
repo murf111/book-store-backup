@@ -28,7 +28,8 @@ INSERT INTO USERS (id, email, password, name, role) VALUES
 (17, 'client7@example.com', '$2a$10$hNUcmFGKIBG49pmL0ftauO1q3Y.QaMXEwfpvMLRCNGgZp.90o5MSe', 'Sierra Mitchell', 'CLIENT'),
 (18, 'client8@example.com', '$2a$10$hNUcmFGKIBG49pmL0ftauO1q3Y.QaMXEwfpvMLRCNGgZp.90o5MSe', 'Quinton Saunders', 'CLIENT'),
 (19, 'client9@example.com', '$2a$10$hNUcmFGKIBG49pmL0ftauO1q3Y.QaMXEwfpvMLRCNGgZp.90o5MSe', 'Amina Clarke', 'CLIENT'),
-(20, 'client10@example.com', '$2a$10$hNUcmFGKIBG49pmL0ftauO1q3Y.QaMXEwfpvMLRCNGgZp.90o5MSe', 'Bryson Chavez', 'CLIENT');
+(20, 'client10@example.com', '$2a$10$hNUcmFGKIBG49pmL0ftauO1q3Y.QaMXEwfpvMLRCNGgZp.90o5MSe', 'Bryson Chavez', 'CLIENT'),
+(21, 'suchdenys220@gmail.com', '$2a$10$hNUcmFGKIBG49pmL0ftauO1q3Y.QaMXEwfpvMLRCNGgZp.90o5MSe', 'Denys Sych', 'CLIENT');
 
 ------------------------------------------------------------------------------------------------------------------------
 
@@ -61,7 +62,8 @@ INSERT INTO CLIENTS (id, balance, is_blocked) VALUES
 (17, 1300.45, false),
 (18, 950.30, false),
 (19, 1050.90, false),
-(20, 880.20, true); 
+(20, 880.20, true),
+(21, 1000, false);
 
 ------------------------------------------------------------------------------------------------------------------------
 

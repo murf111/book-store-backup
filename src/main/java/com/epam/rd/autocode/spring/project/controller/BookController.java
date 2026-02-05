@@ -2,10 +2,13 @@ package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.dto.BookDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
+import com.epam.rd.autocode.spring.project.exception.FileStorageException;
 import com.epam.rd.autocode.spring.project.model.enums.AgeGroup;
 import com.epam.rd.autocode.spring.project.model.enums.Language;
 import com.epam.rd.autocode.spring.project.service.BookService;
+import com.epam.rd.autocode.spring.project.util.BookSortOption;
 import com.epam.rd.autocode.spring.project.util.FileUploadUtil;
+import com.epam.rd.autocode.spring.project.util.ViewNames;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -26,11 +29,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 
+import static com.epam.rd.autocode.spring.project.util.Routes.BOOKS;
+
 @Controller
-@RequestMapping("/books")
+@RequestMapping(BOOKS)
 @RequiredArgsConstructor
 public class BookController {
     private final BookService bookService;
@@ -47,48 +51,46 @@ public class BookController {
             @PageableDefault(size = 8) Pageable pageable,
             Model model) {
 
-        // Translating string "sort" param to actual Sort object
-        Sort sortObj = Sort.unsorted();
-        if ("price_asc".equals(sort)) {
-            sortObj = Sort.by(Sort.Direction.ASC, "price");
-        } else if ("price_desc".equals(sort)) {
-            sortObj = Sort.by(Sort.Direction.DESC, "price");
-        } else if ("name_asc".equals(sort)) {
-            sortObj = Sort.by(Sort.Direction.ASC, "name");
-        } else {
-            // Default: Newest first (Sort by ID Descending)
-            sortObj = Sort.by(Sort.Direction.DESC, "id");
-        }
-
+        // 1. Resolve Sorting
+        Sort sortObj = BookSortOption.fromValue(sort).getSortValue();
         Pageable customPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sortObj);
 
+        // 2. Fetch Data
         Page<BookDTO> bookPage = bookService.findBooks(keyword, genre, minPrice, maxPrice, ageGroup, language, customPageable);
 
+        // 3. Populate Model
         model.addAttribute("books", bookPage);
+        model.addAttribute("keyword", keyword);
         // Thymeleaf helper variables
         model.addAttribute("currentPage", bookPage.getNumber());
         model.addAttribute("totalPages", bookPage.getTotalPages());
         model.addAttribute("totalItems", bookPage.getTotalElements());
 
-        return "books/list";
+        return ViewNames.VIEW_BOOKS_LIST;
     }
 
     @GetMapping("/{name}")
     public String getBookByName(@PathVariable String name, Model model) {
         model.addAttribute("book", bookService.getBookByName(name));
-        return "books/detail";
+        return ViewNames.VIEW_BOOKS_DETAIL;
     }
 
     @GetMapping("/search/{keyword}")
     public String getBookByKeyword(@PathVariable String keyword, Model model) {
+
+        if (keyword == null || keyword.trim().length() < 2) {
+            // Redirect back to main list with an error or just empty
+            return ViewNames.REDIRECT_BOOKS;
+        }
+
         model.addAttribute("books", bookService.getBooksByKeyword(keyword));
-        return "books/list";
+        return ViewNames.VIEW_BOOKS_LIST;
     }
 
     @GetMapping("/add")
     public String showAddBookForm(Model model) {
         model.addAttribute("book", new BookDTO());
-        return "books/add";
+        return ViewNames.VIEW_BOOKS_ADD;
     }
 
     @PostMapping
@@ -96,59 +98,49 @@ public class BookController {
                           BindingResult bindingResult,
                           Model model) {
         if (bindingResult.hasErrors()) {
-            return "books/add";
+            return ViewNames.VIEW_BOOKS_ADD;
         }
 
         try {
-            if (bookDTO.getImageFile() != null && !bookDTO.getImageFile().isEmpty()) {
-                String fileName = FileUploadUtil.saveFile(bookDTO.getImageFile());
-                bookDTO.setImageUrl(fileName);
-            }
-
+            processImageUpload(bookDTO);
             bookService.addBook(bookDTO);
         } catch (AlreadyExistException e) {
             bindingResult.rejectValue("name", "error.book", e.getMessage());
-            return "books/add";
-        } catch (IOException e) {
+            return ViewNames.VIEW_BOOKS_ADD;
+        } catch (FileStorageException e) {
             // Handle File Upload Error
-            e.printStackTrace(); // Good for debugging
-            bindingResult.reject("error.upload", "Failed to upload image. Please try again.");
-            return "books/add";
+            bindingResult.reject("error.upload", "Failed to upload image: " + e.getMessage());
+            return ViewNames.VIEW_BOOKS_ADD;
         }
 
-        return "redirect:/books";
+        return ViewNames.REDIRECT_BOOKS;
     }
 
     @GetMapping("/{name}/edit")
     public String showEditBookForm(@PathVariable String name, Model model) {
         BookDTO bookDTO = bookService.getBookByName(name);
         model.addAttribute("book", bookDTO);
-        return "books/edit";
+        return ViewNames.VIEW_BOOKS_EDIT;
     }
 
     @PatchMapping("/{id}")
     public String updateBookById(@PathVariable Long id, @ModelAttribute("book") @Valid BookDTO bookDTO,
                                  BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "books/edit";
+            return ViewNames.VIEW_BOOKS_EDIT;
         }
 
         try {
-            // Handle Image Upload (Logic copied from addBook)
-            if (bookDTO.getImageFile() != null && !bookDTO.getImageFile().isEmpty()) {
-                String fileName = FileUploadUtil.saveFile(bookDTO.getImageFile());
-                bookDTO.setImageUrl(fileName);
-            }
+            processImageUpload(bookDTO);
 
             bookService.updateBookById(id, bookDTO);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            bindingResult.reject("error.upload", "Failed to upload image.");
-            return "books/edit";
+        } catch (FileStorageException e) {
+            bindingResult.reject("error.upload", "Failed to upload image: " + e.getMessage());
+            return ViewNames.VIEW_BOOKS_EDIT;
         }
 
-        return "redirect:/books/" + bookDTO.getName();
+        return ViewNames.REDIRECT_BOOKS + "/" + bookDTO.getName();
     }
 
     @DeleteMapping("/{id}")
@@ -157,6 +149,13 @@ public class BookController {
 
         redirectAttributes.addFlashAttribute("successMessage", "Book deleted successfully!");
 
-        return "redirect:/books";
+        return ViewNames.REDIRECT_BOOKS;
+    }
+
+    private void processImageUpload(BookDTO bookDTO) {
+        if (bookDTO.getImageFile() != null && !bookDTO.getImageFile().isEmpty()) {
+            String fileName = FileUploadUtil.saveFile(bookDTO.getImageFile());
+            bookDTO.setImageUrl(fileName);
+        }
     }
 }

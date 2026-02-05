@@ -1,7 +1,9 @@
 package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.dto.EmployeeDTO;
+import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
+import com.epam.rd.autocode.spring.project.util.ViewNames;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,22 +20,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import static com.epam.rd.autocode.spring.project.util.Routes.STAFF;
+
 @Controller
-@RequestMapping("/staff")
+@RequestMapping(STAFF)
 @RequiredArgsConstructor
 public class EmployeeController {
-    private final EmployeeService employeeService;
 
-//    @GetMapping
-//    public String getAllEmployees(Model model) {
-//        model.addAttribute("staff", employeeService.getAllEmployees());
-//        return "staff";
-//    }
+    private final EmployeeService employeeService;
 
     @GetMapping
     @PreAuthorize("hasAnyRole('EMPLOYEE')")
     public String showStaffDirectory(Model model) {
-        // Load the list of employees
+
         model.addAttribute("employees", employeeService.getAllEmployees());
 
         // Add an empty object for the "Add Employee" form to bind to
@@ -41,19 +40,13 @@ public class EmployeeController {
             model.addAttribute("newEmployee", new EmployeeDTO());
         }
 
-        return "staff"; // Maps to src/main/resources/templates/staff/employee-list.html
+        return ViewNames.VIEW_STAFF;
     }
 
     @GetMapping("/{email}")
     public EmployeeDTO getEmployeeByEmail(@PathVariable String email) {
         return employeeService.getEmployeeByEmail(email);
     }
-
-//    @PostMapping
-//    public ResponseEntity<EmployeeDTO> addEmployee(@RequestParam @Valid EmployeeDTO employeeDTO) {
-//        EmployeeDTO employee = employeeService.addEmployee(employeeDTO);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(employee);
-//    }
 
     @PostMapping("/add")
     @PreAuthorize("hasRole('EMPLOYEE')")
@@ -65,18 +58,19 @@ public class EmployeeController {
         if (bindingResult.hasErrors()) {
             // Reload the list so the table doesn't disappear
             model.addAttribute("employees", employeeService.getAllEmployees());
-            return "staff";
+            return ViewNames.VIEW_STAFF;
         }
 
         try {
             employeeService.addEmployee(employeeDTO);
             redirectAttributes.addFlashAttribute("successMessage", "staff.notify.success");
-            return "redirect:/staff"; // Post-Redirect-Get pattern
-        } catch (Exception e) {
+            return ViewNames.REDIRECT_STAFF; // Post-Redirect-Get pattern
+
+        } catch (AlreadyExistException e) {
             // If service throws error (e.g. Email exists), show it
             model.addAttribute("errorMessage", e.getMessage());
             model.addAttribute("employees", employeeService.getAllEmployees());
-            return "staff";
+            return ViewNames.VIEW_STAFF;
         }
     }
 
@@ -89,6 +83,6 @@ public class EmployeeController {
     @PreAuthorize("hasRole('EMPLOYEE')")
     public String deleteEmployeeByEmail(@PathVariable String email) {
         employeeService.deleteEmployeeByEmail(email);
-        return "redirect:/staff";
+        return ViewNames.REDIRECT_STAFF;
     }
 }

@@ -16,6 +16,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+import static com.epam.rd.autocode.spring.project.util.Routes.BOOKS;
+import static com.epam.rd.autocode.spring.project.util.Routes.BOOKS_ADD;
+import static com.epam.rd.autocode.spring.project.util.Routes.CART;
+import static com.epam.rd.autocode.spring.project.util.Routes.CLIENTS;
+import static com.epam.rd.autocode.spring.project.util.Routes.HOME;
+import static com.epam.rd.autocode.spring.project.util.Routes.LOGIN;
+import static com.epam.rd.autocode.spring.project.util.Routes.LOGOUT;
+import static com.epam.rd.autocode.spring.project.util.Routes.ORDERS;
+import static com.epam.rd.autocode.spring.project.util.Routes.PASSWORD;
+import static com.epam.rd.autocode.spring.project.util.Routes.PROFILE;
+import static com.epam.rd.autocode.spring.project.util.Routes.REGISTER;
+import static com.epam.rd.autocode.spring.project.util.Routes.STAFF;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -30,47 +43,52 @@ public class SecurityConfig{
         http
                 .csrf(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
-                        // For public (registration & database)
+                        // --- Public Resources (DB & Static) ---
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/content/**").permitAll()
-                        .requestMatchers("/register").permitAll()
-                        .requestMatchers("/login").permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/books/**", "/").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/clients").permitAll()
+                        // --- Authentication ---
+                        .requestMatchers(REGISTER, LOGIN).permitAll()
+                        .requestMatchers(PASSWORD + "/**").permitAll()
 
-                        // For employees
-                        .requestMatchers("/employees/**").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.POST, "/books", "/employees").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.PATCH, "/books/**").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.DELETE, "/books/**").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.GET, "/clients/**").hasRole("EMPLOYEE")
-                        .requestMatchers(HttpMethod.PATCH, "/clients/*/block").hasRole("EMPLOYEE")
-                        .requestMatchers("/orders/*/confirm").hasRole("EMPLOYEE")
+                        // --- Employee Restricted ---
+                        .requestMatchers(STAFF + "/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.POST, BOOKS, STAFF).hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.PATCH, BOOKS + "/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.DELETE, BOOKS + "/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.GET, CLIENTS + "/**").hasRole("EMPLOYEE")
+                        .requestMatchers(HttpMethod.PATCH, CLIENTS + "/*/block").hasRole("EMPLOYEE")
+                        .requestMatchers(ORDERS + "/*/confirm").hasRole("EMPLOYEE")
 
-                        // Restrict the "Add" and "Edit" pages to Employees only
-                        .requestMatchers("/books/add", "/books/*/edit").hasRole("EMPLOYEE")
+                        // Employee Pages (Add/Edit)
+                        .requestMatchers(BOOKS_ADD, BOOKS + "/*/edit").hasRole("EMPLOYEE")
 
-                        // For clients
-                        .requestMatchers(HttpMethod.POST, "/orders").hasRole("CLIENT")
-                        .requestMatchers("/cart/**").hasRole("CLIENT")
+                        // PLACED HERE BECAUSE IT IS ON TOP ANYBODY CAN ACCESS books/add
+                        // --- Public Read Access ---
+                        .requestMatchers(HttpMethod.GET, BOOKS + "/**", HOME).permitAll()
+                        .requestMatchers(HttpMethod.POST, CLIENTS).permitAll()
 
-                        .requestMatchers("/orders/**").authenticated()
-                        .requestMatchers("/profile/**").authenticated()
+                        // --- Client Restricted ---
+                        .requestMatchers(HttpMethod.POST, ORDERS).hasRole("CLIENT")
+                        .requestMatchers(CART + "/**").hasRole("CLIENT")
+
+                        // --- Authenticated General ---
+                        .requestMatchers(ORDERS + "/**").authenticated()
+                        .requestMatchers(PROFILE + "/**").authenticated()
 
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults())
                 .formLogin(form -> form
-                        .loginPage("/login")           // The URL of custom page
-                        .loginProcessingUrl("/login")  // The URL where the form POSTs data
-                        .defaultSuccessUrl("/", true)  // Redirect to Home after success
+                        .loginPage(LOGIN)           // The URL of custom page
+                        .loginProcessingUrl(LOGIN)  // The URL where the form POSTs data
+                        .defaultSuccessUrl(HOME, true)  // Redirect to Home after success
                         .failureHandler(failureHandler) // Redirect here on bad password
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
-                        .logoutSuccessUrl("/login?logout=true")
+                        .logoutRequestMatcher(new AntPathRequestMatcher(LOGOUT))
+                        .logoutSuccessUrl(LOGIN + "?logout=true")
                         .permitAll()
                 )
                 .headers(headers -> headers

@@ -70,4 +70,12 @@ public abstract class User {
 
     @Column(name = "lock_time")
     private LocalDateTime lockTime;
+
+    @Column(name = "reset_token")
+    @ToString.Exclude
+    private String resetToken;
+
+    @Column(name = "reset_token_expiry")
+    @ToString.Exclude
+    private LocalDateTime resetTokenExpiry;
 }

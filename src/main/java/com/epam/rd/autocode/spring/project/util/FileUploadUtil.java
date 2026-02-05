@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.util;
 
+import com.epam.rd.autocode.spring.project.exception.FileStorageException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -10,31 +11,30 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
+// ADD VALIDATION SIZE OF FILE/ розширення файлу
 public class FileUploadUtil {
 
-    public static String saveFile(MultipartFile file) throws IOException {
+    public static String saveFile(MultipartFile file) {
         if (file.isEmpty()) {
             return null;
         }
 
-        // Project Root Directory dynamically
-        String projectDir = System.getProperty("user.dir");
+        try {
+            String projectDir = System.getProperty("user.dir");
+            Path uploadPath = Paths.get(projectDir, "uploads");
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
 
-        // Absolute path to "uploads"
-        Path uploadPath = Paths.get(projectDir, "uploads");
+            String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+            try (InputStream inputStream = file.getInputStream()) {
+                Path filePath = uploadPath.resolve(fileName);
+                Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+            }
+            return fileName;
 
-        if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
+        } catch (IOException e) {
+            throw new FileStorageException("Could not store file " + file.getOriginalFilename(), e);
         }
-
-        // Generate Filename & Save
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-
-        try (InputStream inputStream = file.getInputStream()) {
-            Path filePath = uploadPath.resolve(fileName);
-            Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        return fileName;
     }
 }

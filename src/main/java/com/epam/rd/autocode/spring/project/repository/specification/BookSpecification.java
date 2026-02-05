@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 
 public class BookSpecification {
 
-    // Rule: Filter by Keyword (checks Name OR Author)
+    // Filter by Keyword (checks Name OR Author)
     public static Specification<Book> hasKeyword(String keyword) {
         return (root, query, criteriaBuilder) -> {
             if (keyword == null || keyword.trim().isEmpty()) {
@@ -23,7 +23,7 @@ public class BookSpecification {
         };
     }
 
-    // Rule: Filter by Genre
+    // Filter by Genre
     public static Specification<Book> hasGenre(String genre) {
         return (root, query, criteriaBuilder) -> {
             if (genre == null || genre.trim().isEmpty()) {
@@ -33,6 +33,7 @@ public class BookSpecification {
         };
     }
 
+    // Filter by AgeGroup
     public static Specification<Book> hasAgeGroup(AgeGroup ageGroup) {
         return (root, query, criteriaBuilder) -> {
             if (ageGroup == null) {
@@ -42,6 +43,7 @@ public class BookSpecification {
         };
     }
 
+    // Filter by Language
     public static Specification<Book> hasLanguage(Language language) {
         return (root, query, criteriaBuilder) -> {
             if (language == null) {
@@ -51,7 +53,7 @@ public class BookSpecification {
         };
     }
 
-    // Rule: Price >= Min
+    // Price >= Min
     public static Specification<Book> priceGreaterThan(BigDecimal minPrice) {
         return (root, query, criteriaBuilder) -> {
             if (minPrice == null) {
@@ -61,7 +63,7 @@ public class BookSpecification {
         };
     }
 
-    // Rule: Price <= Max
+    // Price <= Max
     public static Specification<Book> priceLessThan(BigDecimal maxPrice) {
         return (root, query, criteriaBuilder) -> {
             if (maxPrice == null) {

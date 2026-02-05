@@ -13,7 +13,7 @@
     <div th:if="${balanceError}" class="alert alert-danger shadow-sm">
         <i class="bi bi-exclamation-triangle-fill me-2"></i> <span th:text="${balanceError}"></span>
         <br>
-        <a th:href="@{/profile}" class="alert-link" th:text="#{order.confirm.balance_error.link}">Top up your balance here</a>
+        <a th:href="@{/profile}" target="_blank" class="alert-link" th:text="#{order.confirm.balance_error.link}">Top up your balance here</a>
     </div>
 
     <div class="row">

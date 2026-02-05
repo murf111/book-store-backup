@@ -14,11 +14,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -56,9 +58,9 @@ public class BookServiceImpl implements BookService {
             return getAllBooks();
         }
 
+        // ADD modelMapper
         List<Book> books = bookRepository
                 .findByNameContainingIgnoreCaseOrAuthorContainingIgnoreCase(keyword, keyword);
-
 
         return books.stream()
                     .map(book -> modelMapper.map(book, BookDTO.class))
@@ -123,6 +125,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('EMPLOYEE')")
     public void deleteBookById(Long id) {
         bookRepository.delete(bookRepository
                                       .findById(id)
@@ -132,6 +135,7 @@ public class BookServiceImpl implements BookService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('EMPLOYEE')")
     public BookDTO addBook(BookDTO book) {
         if (bookRepository.findByName(book.getName()).isPresent()) {
             throw new AlreadyExistException("Book already exists with name: " + book.getName());

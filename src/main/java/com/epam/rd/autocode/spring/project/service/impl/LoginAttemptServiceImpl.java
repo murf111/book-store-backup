@@ -12,7 +12,7 @@ import java.time.temporal.ChronoUnit;
 
 @Service
 @RequiredArgsConstructor
-public class LoginAttemptServiceImpl implements LoginAttemptService{ // Rename class/implements as needed
+public class LoginAttemptServiceImpl implements LoginAttemptService{ // MAYBE RENAME REQUIRED
 
     private static final int MAX_ATTEMPTS = 3;
     private static final int LOCK_DURATION_MINUTES = 15;

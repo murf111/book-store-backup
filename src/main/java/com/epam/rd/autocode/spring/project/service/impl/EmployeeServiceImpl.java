@@ -8,6 +8,8 @@ import com.epam.rd.autocode.spring.project.repository.EmployeeRepository;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,8 +18,10 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
+
     private final EmployeeRepository employeeRepository;
     private final ModelMapper modelMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public List<EmployeeDTO> getAllEmployees() {
@@ -59,11 +63,14 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasRole('EMPLOYEE')")
     public EmployeeDTO addEmployee(EmployeeDTO employee) {
         if (employeeRepository.findByEmail(employee.getEmail()).isPresent()) {
             throw new AlreadyExistException("Employee already exists with email: " + employee.getEmail());
         }
         Employee newEmployee = modelMapper.map(employee, Employee.class);
+
+        newEmployee.setPassword(passwordEncoder.encode(newEmployee.getPassword()));
 
         Employee savedEmployee = employeeRepository.save(newEmployee);
         return modelMapper.map(savedEmployee, EmployeeDTO.class);
