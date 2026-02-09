@@ -35,7 +35,7 @@ build/
 !.env.example
 
 # Sensitive Files
-final_project_code.txt
+full_project_code.txt
 keystore.p12
 bookstore.p12
 
