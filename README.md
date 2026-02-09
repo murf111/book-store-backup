@@ -1,161 +1,119 @@
-# Book Store. Spring Project
+# 📚 Book Store Service
 
-The purpose of this task is to check your knowledge and understanding in Java and Spring.
+A full-stack Spring Boot application representing a digital book store. This project demonstrates enterprise-level architecture using **Stateless Security (JWT)**, **Dockerized PostgreSQL**, and **Aspect-Oriented Programming (AOP)**.
 
-Duration: **15** hours
+## 🚀 Features
 
-## Description
+### 🔐 Security & Authentication
+* **Hybrid Stateless/Stateful Architecture:** Authentication: Stateless; User Feedback: Stateful
+* **JWT (JSON Web Tokens):** Authentication via tokens stored in **HttpOnly Cookies** (Secured via HTTPS in production).
+* **RBAC (Role-Based Access Control):**
+    * **Guest:** Browse books, register, login.
+    * **Client:** Manage shopping cart, place orders, view order history.
+    * **Employee:** Manage book inventory, confirm orders, block/unblock users.
+* **Password Encryption:** Strong hashing using `BCryptPasswordEncoder`.
 
-Your objective is to develop a "Book Store Service" following the MVC pattern.
+### 📦 Domain Logic
+* **Order Management:** Complex business flow: Cart $\to$ Order creation $\to$ Stock validation $\to$ Employee confirmation.
+* **Inheritance Mapping:** Uses JPA `InheritanceType.JOINED` to model the `User`, `Client`, and `Employee` hierarchy.
+* **DTO Pattern:** Strict separation between Internal Entities and API Data Transfer Objects using `ModelMapper`.
 
-> Project may have two main roles of authority: customer and employee.
+### ⚡ Technical Highlights
+* **Containerization:** PostgreSQL database is fully containerized using **Docker Compose**.
+* **Performance:** Implements `@EntityGraph` to eliminate the **N+1 Select Problem** during complex data fetching.
+* **AOP Logging:** `LoggingAspect` separates cross-cutting concerns (logging, profiling) from business logic.
+* **Validation:** Robust input validation using Jakarta Validation (`@Valid`, `@NotNull`).
+* **Exception Handling:** Global `@ControllerAdvice` for consistent JSON/HTML error responses.
 
-The project structure is already set up, with essential classes waiting for implementation in their respective folders.
-Your project is organized into several packages. Here's a brief overview of each:
+## 🛠 Technology Stack
 
-### Packages Overview
+* **Java:** 17
+* **Framework:** Spring Boot 3.2.1
+* **Security:** Spring Security 6 + JJWT (Java JWT)
+* **Database:** PostgreSQL 15 + Dockerized (production), H2 (development)
+* **Template Engine:** Thymeleaf + Bootstrap 5
+* **DevOps:** Docker & Docker Compose
+* **Tools:** Lombok, ModelMapper, Maven
 
-#### `conf`
+## 🏗 Architecture
 
-- Houses all configuration classes.
+The project follows a layered MVC architecture:
 
-#### `controller`
+1.  **Security Layer:** `JwtAuthenticationFilter` intercepts requests, validates HttpOnly cookies, and sets the Security Context.
+2.  **Controller Layer:** Handles HTTP requests and maps DTOs.
+3.  **Service Layer:** Contains business logic and transactional boundaries (`@Transactional`).
+4.  **Repository Layer:** Interacts with the PostgreSQL database using Spring Data JPA.
 
-- Contains controller files.
+## Project Diagrams
 
-#### `dto`
+* **Security Flow Diagram** 
+* ![SecurityFlow](img/SecurityFlowDiagram.png)
+* **Domain Model Diagram**
+* ![DomainModel](img/DomainModelDiagram.png)
 
-- Contains DTO files.
+## 🚀 Quick Start
 
-#### `model`
+### Prerequisites
+* JDK 17+
+* Maven 3.8+
+* **Docker & Docker Compose** (Required for the Database)
 
-- Contains all model classes.
+### Setup
 
-#### `exception`
+1.  **Clone the repository**
+    ```bash
+    git clone [https://github.com/murf111/book-store-service.git](https://github.com/your-username/book-store-service.git)
+    cd book-store-service
+    ```
 
-- Contains custom user exception files.
+2.  **Start the Infrastructure**
+    The application requires a PostgreSQL container. Start it using Docker Compose:
+    ```bash
+    docker-compose up -d
+    ```
+    *This starts PostgreSQL on port `5432`.*
 
-#### `repo`
+3.  **Configure Application**
+    Create your own `.env` using `.env.example`:
+    ```properties
+    # Database
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_NAME=bookstore
+    DB_USER=admin
+    DB_PASSWORD=your_secure_password_here
 
-- Contains repository files.
+    # JWT
+    JWT_SECRET=generate-your-own-256-bit-secret-key-here
+    JWT_EXPIRATION=3600000
 
-#### `service`
+    # Email (optional)
+    MAIL_HOST=smtp.gmail.com
+    MAIL_PORT=587
+    MAIL_USERNAME=your-email@gmail.com
+    MAIL_PASSWORD=your-app-specific-password
+    ```
 
-- Includes interfaces with declared methods for all services.
+4.  **Run the App**
+    ```bash
+    mvn spring-boot:run -Dspring.profiles.active=dev
+    mvn spring-boot:run -Dspring.profiles.active=prod   // for prod version (port:8443)
+    ```
 
-- `impl`: Encompasses implementations of declared services.
+5.  **Access the Application**
+    * **Development (HTTPS):** `https://localhost:8084`
+    * **Production (HTTPS):** `https://localhost:8443`
+      *(Requires SSL certificate configuration in `application-prod.properties`)*
 
-The class diagram of the Domain model is shown in the figure below:
+### Test Login
+- **Employee:** john.doe@email.com / password
+- **Client:** client1@example.com / password
 
-<img src="img/Diagram.png" alt="DTO" width="1000"/>
+## 🧪 Testing
 
-### Permissions
+The project includes a comprehensive test suite. Integration tests utilize an in-memory H2 database to ensure isolation from the production Docker environment.
 
-> For Any Registered Users
-
-- Access a list of available books.
-- View detailed information about any book.
-- Edit personal information and view user profile.
-
-> For Employees
-
-- Add, edit, or delete books from the list.
-- Confirm orders placed by customers.
-- Block or unblock customer accounts.
-- Access a list of registered customers.
-
-> For Customers
-
-- Add books to the basket for purchase.
-- Delete their account.
-- Submit orders for purchase.
-
-### Services
-
-Below is a list of available services with corresponding methods for implementation.
-
-> Note: You can add your own methods to existing services, as well as create additional services.
-
-#### OrderService
-
-* `getAllOrdersByClient(email: String)`
-  Retrieves a list of all orders by client's email placed in the system.
-* `getAllOrdersByEmployee(email: String)`
-  Retrieves a list of all orders by employee's email placed in the system.
-* `addOrder(order: OrderDTO)`
-  Adds a new order to the system, incorporating the provided order details.
-
-#### EmployeeService
-
-* `getAllEmployees()`
-  Retrieves a list of all employees registered in the system.
-* `getEmployeeByEmail(email: String)`
-  Fetches details of a specific employee based on their email.
-* `updateEmployeeByEmail(email: String, employee: EmployeeDTO)`
-  Updates the information of an existing employee identified by their email with the provided details.
-* `deleteEmployeeByEmail(email: String)`
-  Removes an employee from the system based on their email.
-* `addEmployee(employee: EmployeeDTO)`
-  Registers a new employee in the system with the provided details.
-
-#### ClientService
-
-* `getAllClients()`
-  Retrieves a list of all clients (customers) registered in the system.
-* `getClientByEmail(email: String)`
-  Fetches details of a specific client based on their email.
-* `updateClientByEmail(email: String, client: ClientDTO)`
-  Updates the information of an existing client identified by their email with the provided details.
-* `deleteClientByEmail(email: String)`
-  Removes a client from the system based on their email.
-* `addClient(client: ClientDTO)`
-  Registers a new client in the system with the provided details.
-
-#### BookService
-
-* `getAllBooks()`
-  Retrieves a list of all books available in the store.
-* `getBookByName(name: String)`
-  Fetches details of a specific book based on its name.
-* `updateBookByName(name: String, book: BookDTO)`
-  Updates the information of an existing book identified by its name with the provided details.
-* `deleteBookByName(name: String)`
-  Removes a book from the system based on its name.
-* `addBook(book: BookDTO)`
-  Adds a new book to the system with the provided details.
-
-## Requirements
-
-Ensure implementation of the following:
-
-- `Spring Data JPA` for efficient data management.
--  Incorporate `Spring Security` for robust authentication and authorization.
--  Enable `Internationalization and Localization` to support English and any language you choose.
--  Implement `Validation` for data integrity.
--  Establish `Error handling` for graceful error management.
--  Utilize `DTOs` - data transfer objects structured as illustrated below:
-
-<img src="img/DTO.png" alt="DTO" width="600"/>
-
-## Would be nice
-
-Consider the following additional features:
-
-- Incorporate `Logging` for comprehensive system monitoring.
-- Implement `Pagination and Sorting` for enhanced data presentation.
-
-## Recommendations
-
-> Use wrapper classes (like Long, Integer, etc.) instead of primitive types whenever possible.
-
-- Utilize `Lombok` for streamlined Java code.
-- Use `ModelMapper` for easy mapping between objects.
-- Utilize `Thymeleaf` for HTML templating.
-- Explore the `test` folder to execute provided test cases for your solution.
-- Refer to the `main\resources\sql` folder for SQL scripts to initialize data.
-
-## Special message
-
-- Make the most of the time available.
-  While we understand you may not cover all the points,
-  aim to accomplish as much as possible within the given duration of 15 hours.
+```bash
+# Run all tests
+Unix: export JAVA_HOME=$(/usr/libexec/java_home -v 17) && mvn test
+Windows: $env:JAVA_HOME = "C:\Program Files\Java\jdk-17.0.2"; mvn test

@@ -7,23 +7,21 @@
 
     <div class="card shadow-lg" style="max-width: 400px; width: 100%; border-radius: 10px;">
         <div class="card-body p-5">
-            <h3 class="card-title text-center mb-4 font-weight-bold">Reset Password</h3>
+            <h3 class="card-title text-center mb-4 font-weight-bold" th:text="#{password.reset.title}">Reset Password</h3>
 
             <form th:action="@{/password/reset}" th:object="${passwordResetDTO}" method="post">
-
                 <input type="hidden" th:field="*{token}">
                 <input type="hidden" th:field="*{email}">
 
                 <div class="mb-3">
-                    <label class="form-label text-secondary small">New Password</label>
+                    <label class="form-label text-secondary small" th:text="#{password.reset.new_password_label}">New Password</label>
                     <div class="input-group">
                         <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
-
                         <input type="password"
                                th:field="*{newPassword}"
                                class="form-control"
                                th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid'"
-                               placeholder="Min 8 chars, 1 Upper, 1 Lower, 1 Number">
+                               th:placeholder="#{password.reset.placeholder}">
 
                         <div class="invalid-feedback" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}">
                             Password Error
@@ -32,7 +30,7 @@
                 </div>
 
                 <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-success btn-lg">Change Password</button>
+                    <button type="submit" class="btn btn-success btn-lg" th:text="#{password.reset.submit}">Change Password</button>
                 </div>
             </form>
         </div>

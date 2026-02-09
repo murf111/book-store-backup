@@ -29,7 +29,6 @@ public class CartServiceImpl implements CartService {
     private final ModelMapper modelMapper;
 
     @Override
-    //delete Transactional? READ ON THIS THEME
     public CartDTO getCart(String clientEmail) {
         ShoppingCart cartEntity = getCartEntity(clientEmail);
 

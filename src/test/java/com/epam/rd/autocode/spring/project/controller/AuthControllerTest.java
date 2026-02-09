@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.exception.AlreadyExistException;
+import com.epam.rd.autocode.spring.project.security.JwtUtil;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +23,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(AuthController.class)
-@AutoConfigureMockMvc(addFilters = false) // FIX: Disables security so we can test registration logic
-class AuthControllerTest {
+@AutoConfigureMockMvc(addFilters = false)
+class AuthControllerTest extends BaseControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockBean private ClientService clientService;

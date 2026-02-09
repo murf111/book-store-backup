@@ -3,6 +3,8 @@ package com.epam.rd.autocode.spring.project.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -22,13 +24,13 @@ public class EmployeeDTO{
     @Email
     private String email;
 
-    @NotBlank
+    @NotBlank(message = "{validation.password.required}")
     @ToString.Exclude
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @Size(min = 8, message = "{validation.password.size}")
     @Pattern.List({
-            @Pattern(regexp = ".*[0-9].*", message = "Password must contain at least one number"),
-            @Pattern(regexp = ".*[a-z].*", message = "Password must contain at least one lowercase letter"),
-            @Pattern(regexp = ".*[A-Z].*", message = "Password must contain at least one uppercase letter")
+            @Pattern(regexp = ".*[0-9].*", message = "{validation.password.digit}"),
+            @Pattern(regexp = ".*[a-z].*", message = "{validation.password.lowercase}"),
+            @Pattern(regexp = ".*[A-Z].*", message = "{validation.password.uppercase}"),
     })
     private String password;
 
@@ -38,6 +40,7 @@ public class EmployeeDTO{
     @NotBlank
     private String phone;
 
-    @NotNull
+    @NotNull(message = "{validation.date.required}")
+    @Past(message = "{validation.employee.birth_date_past}")
     private LocalDate birthDate;
 }

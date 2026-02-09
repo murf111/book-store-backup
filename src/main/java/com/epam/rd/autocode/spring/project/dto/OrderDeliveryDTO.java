@@ -6,12 +6,12 @@ import lombok.Data;
 @Data
 public class OrderDeliveryDTO {
 
-    @NotBlank(message = "Delivery address is required")
+    @NotBlank(message = "{validation.order.address_required}")
     private String deliveryAddress;
 
-    @NotBlank(message = "City is required")
+    @NotBlank(message = "{validation.order.city_required}")
     private String city;
 
-    @NotBlank(message = "Postal code is required")
+    @NotBlank(message = "{validation.order.postal_required}")
     private String postalCode;
 }

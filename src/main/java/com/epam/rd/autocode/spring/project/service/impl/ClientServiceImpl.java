@@ -7,6 +7,7 @@ import com.epam.rd.autocode.spring.project.model.Client;
 import com.epam.rd.autocode.spring.project.model.ShoppingCart;
 import com.epam.rd.autocode.spring.project.repository.CartRepository;
 import com.epam.rd.autocode.spring.project.repository.ClientRepository;
+import com.epam.rd.autocode.spring.project.repository.UserRepository;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -29,6 +30,7 @@ public class ClientServiceImpl implements ClientService {
     private final CartRepository cartRepository;
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     @Override
     public List<ClientDTO> getAllClients() {
@@ -71,8 +73,8 @@ public class ClientServiceImpl implements ClientService {
     @Override
     @Transactional
     public ClientDTO addClient(ClientDTO client) {
-        if (clientRepository.findByEmail(client.getEmail()).isPresent()) {
-            throw new AlreadyExistException("Client already exists with email: " + client.getEmail());
+        if (userRepository.findByEmail(client.getEmail()).isPresent()) {
+            throw new AlreadyExistException("User already exists with email: " + client.getEmail());
         }
         Client newClient = modelMapper.map(client, Client.class);
         newClient.setPassword(passwordEncoder.encode(newClient.getPassword()));

@@ -33,7 +33,6 @@ public final class Routes {
 
     // --- ORDER ---
     public static final String ORDERS = "/orders";
-    public static final String ORDERS_MY = "/orders/my"; // For customers
     public static final String ORDERS_PLACE = "/orders/place";
 
     // --- CLIENTS ---

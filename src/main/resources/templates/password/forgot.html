@@ -7,36 +7,37 @@
 
     <div class="card shadow-lg" style="max-width: 400px; width: 100%; border-radius: 10px;">
         <div class="card-body p-5">
-            <h3 class="card-title text-center mb-4 font-weight-bold">Forgot Password</h3>
+            <h3 class="card-title text-center mb-4 font-weight-bold" th:text="#{password.forgot.title}">Forgot Password</h3>
 
-            <p class="text-muted text-center small mb-4">
+            <p class="text-muted text-center small mb-4" th:text="#{password.forgot.instruction}">
                 Enter your email address and we will send you a link to reset your password.
             </p>
 
-            <div th:if="${param.error}" class="alert alert-danger text-center small" role="alert">
+            <div th:if="${param.error}" class="alert alert-danger text-center small" role="alert" th:text="#{password.forgot.error}">
                 Invalid or expired token.
             </div>
+
             <div th:if="${message}" class="alert alert-success text-center small" role="alert" th:text="${message}">
             </div>
 
             <form th:action="@{/password/forgot}" method="post">
                 <div class="mb-3">
-                    <label class="form-label text-secondary small">Email Address</label>
+                    <label class="form-label text-secondary small" th:text="#{password.forgot.email_label}">Email Address</label>
                     <div class="input-group">
                         <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
                         <input type="email" name="email" class="form-control"
-                               placeholder="name@example.com" required>
+                               th:placeholder="#{password.forgot.placeholder}" required>
                     </div>
                 </div>
 
                 <div class="d-grid gap-2 mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">Send Reset Link</button>
+                    <button type="submit" class="btn btn-primary btn-lg" th:text="#{password.forgot.submit}">Send Reset Link</button>
                 </div>
             </form>
 
             <div class="text-center mt-4">
                 <a th:href="@{/login}" class="text-decoration-none text-muted small">
-                    <i class="bi bi-arrow-left"></i> Back to Login
+                    <i class="bi bi-arrow-left"></i> <span th:text="#{password.forgot.back_to_login}">Back to Login</span>
                 </a>
             </div>
         </div>

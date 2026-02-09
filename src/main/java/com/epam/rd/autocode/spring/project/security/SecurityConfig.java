@@ -1,20 +1,25 @@
-package com.epam.rd.autocode.spring.project.conf;
+package com.epam.rd.autocode.spring.project.security;
 
+import jakarta.servlet.http.Cookie;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static com.epam.rd.autocode.spring.project.util.Routes.BOOKS;
 import static com.epam.rd.autocode.spring.project.util.Routes.BOOKS_ADD;
@@ -33,25 +38,27 @@ import static com.epam.rd.autocode.spring.project.util.Routes.STAFF;
 @EnableWebSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
-public class SecurityConfig{
+public class SecurityConfig {
 
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
-    private final CustomAuthFailureHandler failureHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(Customizer.withDefaults())
-                .authorizeHttpRequests(auth -> auth
-                        // --- Public Resources (DB & Static) ---
-                        .requestMatchers("/h2-console/**").permitAll()
-                        .requestMatchers("/css/**", "/js/**", "/images/**", "/content/**").permitAll()
+                .csrf(AbstractHttpConfigurer::disable)
 
-                        // --- Authentication ---
+                // 1. STATELESS
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // 2. ROUTE RULES
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**", "/content/**", "/webjars/**").permitAll()
                         .requestMatchers(REGISTER, LOGIN).permitAll()
                         .requestMatchers(PASSWORD + "/**").permitAll()
 
-                        // --- Employee Restricted ---
+                        // Employee
                         .requestMatchers(STAFF + "/**").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.POST, BOOKS, STAFF).hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.PATCH, BOOKS + "/**").hasRole("EMPLOYEE")
@@ -59,40 +66,45 @@ public class SecurityConfig{
                         .requestMatchers(HttpMethod.GET, CLIENTS + "/**").hasRole("EMPLOYEE")
                         .requestMatchers(HttpMethod.PATCH, CLIENTS + "/*/block").hasRole("EMPLOYEE")
                         .requestMatchers(ORDERS + "/*/confirm").hasRole("EMPLOYEE")
-
-                        // Employee Pages (Add/Edit)
                         .requestMatchers(BOOKS_ADD, BOOKS + "/*/edit").hasRole("EMPLOYEE")
 
-                        // PLACED HERE BECAUSE IT IS ON TOP ANYBODY CAN ACCESS books/add
-                        // --- Public Read Access ---
+                        // Public Read
                         .requestMatchers(HttpMethod.GET, BOOKS + "/**", HOME).permitAll()
                         .requestMatchers(HttpMethod.POST, CLIENTS).permitAll()
 
-                        // --- Client Restricted ---
+                        // Client
                         .requestMatchers(HttpMethod.POST, ORDERS).hasRole("CLIENT")
                         .requestMatchers(CART + "/**").hasRole("CLIENT")
 
-                        // --- Authenticated General ---
+                        // General Authenticated
                         .requestMatchers(ORDERS + "/**").authenticated()
                         .requestMatchers(PROFILE + "/**").authenticated()
-
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
-                .formLogin(form -> form
-                        .loginPage(LOGIN)           // The URL of custom page
-                        .loginProcessingUrl(LOGIN)  // The URL where the form POSTs data
-                        .defaultSuccessUrl(HOME, true)  // Redirect to Home after success
-                        .failureHandler(failureHandler) // Redirect here on bad password
-                        .permitAll()
-                )
+
+                // 3. THE JWT FILTER
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+                // 4. MANUAL LOGOUT (Because I use cookies, must manually delete them)
                 .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher(LOGOUT))
-                        .logoutSuccessUrl(LOGIN + "?logout=true")
-                        .permitAll()
+                        .logoutUrl(LOGOUT)
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            Cookie cookie = new Cookie("accessToken", null);
+                            cookie.setPath("/");
+                            cookie.setHttpOnly(true);
+                            cookie.setMaxAge(0); // Delete immediately
+                            response.addCookie(cookie);
+                            response.sendRedirect(LOGIN + "?logout=true");
+                        })
                 )
-                .headers(headers -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint((request, response, authException) ->
+                                                          response.sendRedirect(LOGIN) // Force Redirect
+                        )
+                )
+
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
         return http.build();
     }
@@ -106,7 +118,12 @@ public class SecurityConfig{
     }
 
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+        return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 }

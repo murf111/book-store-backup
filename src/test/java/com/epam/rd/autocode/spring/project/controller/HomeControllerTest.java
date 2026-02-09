@@ -1,14 +1,13 @@
 package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.conf.CustomAuthFailureHandler;
-import com.epam.rd.autocode.spring.project.conf.SecurityConfig;
+import com.epam.rd.autocode.spring.project.security.SecurityConfig;
 import com.epam.rd.autocode.spring.project.service.BookService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Collections;
@@ -21,14 +20,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(HomeController.class)
 @Import(SecurityConfig.class)
-class HomeControllerTest {
+class HomeControllerTest extends BaseControllerTest {
 
     @Autowired private MockMvc mockMvc;
-
     @MockBean private BookService bookService;
-
-    // [FIX] Required by SecurityConfig
-    @MockBean private UserDetailsService userDetailsService;
     @MockBean private CustomAuthFailureHandler failureHandler;
 
     @Test

@@ -8,20 +8,19 @@ import lombok.Data;
 
 @Data
 public class RegistrationDTO {
-    @NotBlank(message = "Name is required")
+    @NotBlank(message = "{validation.user.name_required}")
     private String name;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
+    @NotBlank(message = "{validation.user.email_required}")
+    @Email(message = "{validation.user.email_invalid}")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
-    // Better for real-world online bookstore
+    @NotBlank(message = "{validation.password.required}")
+    @Size(min = 8, message = "{validation.password.size}")
     @Pattern.List({
-            @Pattern(regexp = ".*[0-9].*", message = "Password must contain at least one number"),
-            @Pattern(regexp = ".*[a-z].*", message = "Password must contain at least one lowercase letter"),
-            @Pattern(regexp = ".*[A-Z].*", message = "Password must contain at least one uppercase letter")
+            @Pattern(regexp = ".*[0-9].*", message = "{validation.password.digit}"),
+            @Pattern(regexp = ".*[a-z].*", message = "{validation.password.lowercase}"),
+            @Pattern(regexp = ".*[A-Z].*", message = "{validation.password.uppercase}")
     })
     /*
     Requirement "Enforce strong password policies (Min length, special characters, etc.)"

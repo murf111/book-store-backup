@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.controller;
 
+import com.epam.rd.autocode.spring.project.security.JwtUtil;
 import com.epam.rd.autocode.spring.project.service.OrderService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * </p>
  */
 @WebMvcTest(OrderController.class)
-class OrderControllerTest {
+class OrderControllerTest extends BaseControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockBean private OrderService orderService;

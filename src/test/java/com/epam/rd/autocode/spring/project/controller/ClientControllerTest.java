@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.controller;
 
+import com.epam.rd.autocode.spring.project.security.JwtUtil;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(ClientController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class ClientControllerTest {
+class ClientControllerTest extends BaseControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockBean private ClientService clientService;

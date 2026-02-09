@@ -10,7 +10,7 @@
 <div class="container mt-5 mb-5">
     <h2 class="mb-4" th:text="#{order.title}">Order History</h2>
 
-    <div th:if="${orders.empty}" class="alert alert-info text-center">
+    <div th:if="${orders.empty}" class="alert alert-info text-center" th:text="#{order.no_orders_found}">
         <i class="bi bi-inbox me-2"></i> No orders found.
     </div>
 

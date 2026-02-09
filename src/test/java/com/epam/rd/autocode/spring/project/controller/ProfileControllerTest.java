@@ -2,6 +2,7 @@ package com.epam.rd.autocode.spring.project.controller;
 
 import com.epam.rd.autocode.spring.project.dto.ClientDTO;
 import com.epam.rd.autocode.spring.project.dto.UserDTO;
+import com.epam.rd.autocode.spring.project.security.JwtUtil;
 import com.epam.rd.autocode.spring.project.service.ClientService;
 import com.epam.rd.autocode.spring.project.service.EmployeeService;
 import com.epam.rd.autocode.spring.project.service.PaymentService;
@@ -26,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
 
 @WebMvcTest(ProfileController.class)
-class ProfileControllerTest {
+class ProfileControllerTest extends BaseControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockBean private UserService userService;

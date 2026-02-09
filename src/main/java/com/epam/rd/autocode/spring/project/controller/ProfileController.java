@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 
@@ -76,18 +75,21 @@ public class ProfileController {
     public String topUpBalance(@ModelAttribute("paymentRequest") @Valid PaymentRequestDTO paymentRequest,
                                BindingResult bindingResult,
                                Authentication authentication,
-                               RedirectAttributes redirectAttributes) {
+                               Model model) {
 
         if (bindingResult.hasErrors()) {
+            // RELOAD DATA so the page doesn't crash
+            addCommonAttributes(model);
+
+            // Add custom error message for the view to display
             String msg = messageSource.getMessage("profile.topup.error.general", null, LocaleContextHolder.getLocale());
-            redirectAttributes.addFlashAttribute("errorMessage", msg);
-            return ViewNames.REDIRECT_PROFILE;
+            model.addAttribute("errorMessage", msg);
+
+            // Return VIEW directly (Stateless)
+            return ViewNames.VIEW_PROFILE;
         }
 
         paymentService.processPayment(authentication.getName(), paymentRequest);
-
-        String msg = messageSource.getMessage("profile.topup.success", null, LocaleContextHolder.getLocale());
-        redirectAttributes.addFlashAttribute("successMessage", msg);
 
         return ViewNames.REDIRECT_PROFILE;
     }
@@ -99,7 +101,7 @@ public class ProfileController {
                                  Model model) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("user", userService.getCurrentUser());
+            addCommonAttributes(model);
             return ViewNames.VIEW_PROFILE;
         }
 
@@ -108,9 +110,8 @@ public class ProfileController {
                                                        changePasswordDTO.getNewPassword());
 
         if (!isChanged) {
-            model.addAttribute("user", userService.getCurrentUser());
-            // a global error
-            bindingResult.rejectValue("currentPassword", "error.currentPassword", "Incorrect current password");
+            bindingResult.rejectValue("currentPassword", "error.currentPassword", "{validation.password.invalid_current");
+            addCommonAttributes(model);
             return ViewNames.VIEW_PROFILE;
         }
 
@@ -121,5 +122,26 @@ public class ProfileController {
     public String deleteAccount() {
         userService.deleteCurrentUser();
         return ViewNames.REDIRECT_LOGOUT;
+    }
+
+    // --- HELPER METHOD TO LOAD COMMON DATA ---
+    private void addCommonAttributes(Model model) {
+        UserDTO currentUser = userService.getCurrentUser();
+        String email = currentUser.getEmail();
+
+        // 1. Load specific user type details
+        if ("CLIENT".equals(currentUser.getRole())) {
+            model.addAttribute("user", clientService.getClientByEmail(email));
+        } else {
+            model.addAttribute("user", employeeService.getEmployeeByEmail(email));
+        }
+
+        // 2. Ensure Forms exist if not already in Model (e.g. from validation errors)
+        if (!model.containsAttribute("changePasswordDTO")) {
+            model.addAttribute("changePasswordDTO", new ChangePasswordDTO());
+        }
+        if (!model.containsAttribute("paymentRequest")) {
+            model.addAttribute("paymentRequest", new PaymentRequestDTO());
+        }
     }
 }

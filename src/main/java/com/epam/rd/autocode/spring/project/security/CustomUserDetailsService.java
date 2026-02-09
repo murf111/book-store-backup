@@ -1,4 +1,4 @@
-package com.epam.rd.autocode.spring.project.conf;
+package com.epam.rd.autocode.spring.project.security;
 
 import com.epam.rd.autocode.spring.project.exception.NotFoundException;
 import com.epam.rd.autocode.spring.project.model.Client;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 
-// Check if really in package conf or service/security
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {

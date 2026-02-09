@@ -1,4 +1,4 @@
-package com.epam.rd.autocode.spring.project.util;
+package com.epam.rd.autocode.spring.project.dto.enums;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +20,8 @@ public enum BookSortOption {
 
     public static BookSortOption fromValue(String value) {
         return Arrays.stream(values())
-                     .filter(opt -> opt.value.equalsIgnoreCase(value))
+                     .filter(v -> v.getValue().equalsIgnoreCase(value))
                      .findFirst()
-                     .orElse(NEWEST); // Safe fallback
+                     .orElse(NEWEST); // ← default
     }
 }

@@ -63,4 +63,6 @@ public final class ViewNames {
     public static final String REDIRECT_CLIENTS = "redirect:" + Routes.CLIENTS;
     public static final String REDIRECT_PROFILE = "redirect:" + Routes.PROFILE;
     public static final String REDIRECT_LOGOUT = "redirect:" + Routes.LOGOUT;
+    public static final String REDIRECT_PASSWORD_FORGOT = "redirect:/" + VIEW_PASSWORD_FORGOT;
+
 }

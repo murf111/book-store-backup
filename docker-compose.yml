@@ -7,9 +7,9 @@ services:
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_DB=bookstore
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=${DB_NAME:-bookstore}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: always

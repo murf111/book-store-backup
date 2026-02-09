@@ -1,5 +1,6 @@
 package com.epam.rd.autocode.spring.project.controller;
 
+import com.epam.rd.autocode.spring.project.security.JwtUtil;
 import com.epam.rd.autocode.spring.project.service.PasswordRecoveryService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.flash;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -19,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(PasswordController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class PasswordControllerTest {
+class PasswordControllerTest extends BaseControllerTest {
 
     @Autowired private MockMvc mockMvc;
     @MockBean private PasswordRecoveryService recoveryService;
@@ -36,9 +38,10 @@ class PasswordControllerTest {
         mockMvc.perform(post("/password/forgot")
                                 .with(csrf())
                                 .param("email", "user@example.com"))
-               .andExpect(status().isOk()) // Expect 200 OK, not 3xx Redirect
-               .andExpect(view().name("password/forgot"))
-               .andExpect(model().attributeExists("message"));
+               .andExpect(status().is3xxRedirection())
+               .andExpect(redirectedUrl("/password/forgot"))
+               .andExpect(view().name("redirect:/password/forgot"))
+               .andExpect(flash().attributeExists("message"));
 
         verify(recoveryService).processForgotPassword("user@example.com");
     }

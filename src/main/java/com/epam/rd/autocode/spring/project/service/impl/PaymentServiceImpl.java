@@ -22,11 +22,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Transactional
     public void processPayment(String userEmail, PaymentRequestDTO request) {
         if (request.getCardNumber().startsWith("0000")) {
-            throw new PaymentDeclinedException("Payment declined: Card reported lost or stolen.");
+            throw new PaymentDeclinedException("profile.topup.error.card_lost_stolen");
         }
 
         if (isCardExpired(request.getExpirationDate())) {
-            throw new PaymentDeclinedException("Payment declined: Card has expired.");
+            throw new PaymentDeclinedException("profile.topup.error.card_expired");
         }
 
         Client client = clientRepository.findByEmail(userEmail)

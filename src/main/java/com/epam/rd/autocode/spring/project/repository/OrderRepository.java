@@ -14,11 +14,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @EntityGraph(attributePaths = {"bookItems", "bookItems.book", "client", "employee"})
     List<Order> findAll();
 
-    // SOLVED: Fetches orders + bookItems for a specific client
     @EntityGraph(attributePaths = {"bookItems", "bookItems.book", "client", "employee"})
     List<Order> findAllByClientEmail(String email);
 
-    // SOLVED: Fetches orders + bookItems for a specific employee
     @EntityGraph(attributePaths = {"bookItems", "bookItems.book", "client", "employee"})
     List<Order> findAllByEmployeeEmail(String email);
 }

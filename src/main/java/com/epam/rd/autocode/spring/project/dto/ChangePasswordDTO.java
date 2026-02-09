@@ -7,15 +7,15 @@ import lombok.Data;
 
 @Data
 public class ChangePasswordDTO {
-    @NotBlank(message = "Current password is required")
+    @NotBlank(message = "{validation.password.current_required}")
     private String currentPassword;
 
-    @NotBlank(message = "New password is required")
-    @Size(min = 8, message = "Password must be at least 8 characters")
+    @NotBlank(message = "{validation.password.new_required}")
+    @Size(min = 8, message = "{validation.password.size}")
     @Pattern.List({
-            @Pattern(regexp = ".*[0-9].*", message = "Password must contain at least one number"),
-            @Pattern(regexp = ".*[a-z].*", message = "Password must contain at least one lowercase letter"),
-            @Pattern(regexp = ".*[A-Z].*", message = "Password must contain at least one uppercase letter"),
+            @Pattern(regexp = ".*[0-9].*", message = "{validation.password.digit}"),
+            @Pattern(regexp = ".*[a-z].*", message = "{validation.password.lowercase}"),
+            @Pattern(regexp = ".*[A-Z].*", message = "{validation.password.uppercase}"),
     })
     private String newPassword;
 }
