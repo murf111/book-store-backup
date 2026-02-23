@@ -52,10 +52,8 @@ public class LoginController {
             // 3. Generate Token & Cookie
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             String token = jwtUtil.generateToken(userDetails);
-            Cookie cookie = new Cookie("accessToken", token);
-            cookie.setHttpOnly(true);
-            cookie.setPath("/");
-            response.addCookie(cookie);
+            response.setHeader("Set-Cookie",
+                               "accessToken=" + token + "; Path=/; HttpOnly; SameSite=Lax; Secure");
 
             return ViewNames.REDIRECT_HOME;
 

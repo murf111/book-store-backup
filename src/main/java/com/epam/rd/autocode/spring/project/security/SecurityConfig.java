@@ -89,11 +89,8 @@ public class SecurityConfig {
                 .logout(logout -> logout
                         .logoutUrl(LOGOUT)
                         .logoutSuccessHandler((request, response, authentication) -> {
-                            Cookie cookie = new Cookie("accessToken", null);
-                            cookie.setPath("/");
-                            cookie.setHttpOnly(true);
-                            cookie.setMaxAge(0); // Delete immediately
-                            response.addCookie(cookie);
+                            response.setHeader("Set-Cookie",
+                                               "accessToken=; Path=/; HttpOnly; Max-Age=0; SameSite=Lax; Secure");
                             response.sendRedirect(LOGIN + "?logout=true");
                         })
                 )
@@ -104,7 +101,9 @@ public class SecurityConfig {
                         )
                 )
 
-                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
+                .headers(headers -> headers
+                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
+                );
 
         return http.build();
     }
